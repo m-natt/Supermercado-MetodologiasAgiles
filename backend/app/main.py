@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.routers import health
+from app.routers import categorias, health, marcas, productos
 
 app = FastAPI(title="API del Supermercado")
 
@@ -52,3 +52,6 @@ def inicio():
 
 
 app.include_router(health.router)
+app.include_router(categorias.router)
+app.include_router(marcas.router)
+app.include_router(productos.router)
