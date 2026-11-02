@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Catálogo de productos del supermercado">
+  <title>Supermercado Equipo 6 | Catálogo</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/catalogo.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Supermercado Equipo 6, inicio">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" role="img" focusable="false">
+          <path d="M7 10h5l4.2 20.2a4 4 0 0 0 3.9 3.2h17.2a4 4 0 0 0 3.8-2.8L45 17H15" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19 23h20M21 17l2 13m11-13-2 13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="21" cy="40" r="3" fill="currentColor"/>
+          <circle cx="37" cy="40" r="3" fill="currentColor"/>
+        </svg>
+      </span>
+      <span class="brand-name">Supermercado <span class="brand-accent">Equipo 6</span></span>
+    </a>
+    <span class="topbar-note">Tu supermercado de confianza</span>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">FRESCO · CERCA · PARA TI</p>
+        <h1>Todo lo que necesitas,<br><span>en un solo lugar.</span></h1>
+        <p class="hero-copy">Explora nuestro catálogo y descubre los productos disponibles.</p>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <span class="hero-circle circle-one"></span>
+        <span class="hero-circle circle-two"></span>
+        <span class="basket">🛒</span>
+        <span class="floating fruit">🍊</span>
+        <span class="floating leaf">🥬</span>
+      </div>
+    </section>
+
+    <section class="catalog-section" aria-labelledby="catalog-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">DESCUBRE NUESTRA SELECCIÓN</p>
+          <h2 id="catalog-title">Catálogo de productos</h2>
+        </div>
+        <span id="product-count" class="product-count">Cargando productos…</span>
+      </div>
+
+      <div id="catalog-status" class="status" role="status" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Cargando catálogo…</span>
+      </div>
+      <div id="product-grid" class="product-grid"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>© <span id="year"></span> Supermercado Equipo 6</span>
+    <span>Catálogo de productos</span>
+  </footer>
+
+  <dialog id="product-dialog" class="product-dialog">
+    <button class="dialog-close" id="dialog-close" aria-label="Cerrar detalle">×</button>
+    <div id="dialog-content"></div>
+  </dialog>
+</body>
+</html>
