@@ -1,8 +1,3 @@
-/*
- * E6-8 - Vista del catálogo
- * Consume el endpoint existente GET /api/productos del backend FastAPI.
- * Si el backend corre en otra dirección, cambia API_BASE.
- */
 const API_BASE = "http://localhost:8000";
 
 const grid = document.getElementById("product-grid");
