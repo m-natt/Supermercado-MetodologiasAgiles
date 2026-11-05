@@ -88,8 +88,6 @@ class Review:
     comment: str
 
 
-
-
 def require_permission(permission: Permission):
     """Verifica que el usuario (primer argumento tras self) no esté baneado
     y tenga el permiso indicado."""
@@ -133,7 +131,8 @@ class Store:
     def _get_own_product(self, user: User, product_id: int) -> Product:
         product = self._get_product(product_id)
         if product.seller_id != user.id:
-            raise PermissionDenied("Solo puedes modificar tus propios productos.")
+            raise PermissionDenied(
+                "Solo puedes modificar tus propios productos.")
         return product
 
     # --- Vendedor ---
@@ -142,7 +141,8 @@ class Store:
                        description: str = "") -> Product:
         if price <= 0:
             raise ValueError("El precio debe ser mayor a 0.")
-        product = Product(next(self._product_ids), user.id, name, price, description)
+        product = Product(next(self._product_ids), user.id,
+                          name, price, description)
         self.products[product.id] = product
         return product
 
@@ -198,7 +198,8 @@ class Store:
         self._get_product(product_id)
         if not 1 <= rating <= 5:
             raise ValueError("La calificación debe estar entre 1 y 5.")
-        review = Review(next(self._review_ids), product_id, user.id, rating, comment)
+        review = Review(next(self._review_ids), product_id,
+                        user.id, rating, comment)
         self.reviews[review.id] = review
         return review
 
@@ -217,14 +218,12 @@ class Store:
                         if r.product_id != product_id}
 
 
-
-
 def _intentar(descripcion: str, accion):
     try:
         resultado = accion()
-        print(f"✅ {descripcion} -> {resultado}")
+        print(f" {descripcion} -> {resultado}")
     except StoreError as e:
-        print(f"⛔ {descripcion} -> {e}")
+        print(f" {descripcion} -> {e}")
 
 
 if __name__ == "__main__":
