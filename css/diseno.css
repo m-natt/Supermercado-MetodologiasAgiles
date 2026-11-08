@@ -186,22 +186,3 @@
 @media (max-width: 640px) {
   .banner { padding: 3.5rem 1.2rem; }
 }
-
-:root {
-  --green: #ae2929;        
-  --green-dark: #7d1c1c;   
-  --green-soft: #fff3e6;   
-  --orange: #f77f00;
-}
-
-.product-image-wrap,
-.dialog-image { background: #fff8f1; }
-
-.detail-button { border-color: #f3c9a8; }
-
-.spinner { border-color: #f6dcc6; border-top-color: var(--green); }
-
-.product-card:hover { box-shadow: 0 12px 30px rgba(174, 41, 41, .15); }
-
-.product-dialog { box-shadow: 0 25px 90px rgba(60, 15, 10, .35); }
-.product-dialog::backdrop { background: rgba(60, 15, 10, .5); }
