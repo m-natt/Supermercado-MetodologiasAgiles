@@ -1,9 +1,3 @@
-/* =====================================================
-   diseno.css — Diseño "Supermercado Bonito :3"
-   Se carga DESPUÉS de styles.css.
-   Las clases .hero y .footer del diseño se renombraron a
-   .banner y .pie para no chocar con las de styles.css.
-   ===================================================== */
 
 :root {
   --rojo: #ae2929;
@@ -12,8 +6,6 @@
   --naranja-oscuro: #aa4615;
 }
 
-/* Reset limitado SOLO a las secciones del diseño
-   (así no afecta al catálogo) */
 .header *,
 .banner *,
 .categorias *,
@@ -54,8 +46,7 @@
   min-width: 180px;
   max-width: 420px;
   margin-left: auto;
-  margin-right: 2.5rem; /* corregido: antes decía "2.5 rem" con espacio */
-}
+  margin-right: 2.5rem; 
 
 .buscador__icono {
   position: absolute;
@@ -114,7 +105,7 @@
   background:
     linear-gradient(120deg, rgba(214, 40, 40, .8), rgba(247, 127, 0, .6)),
     url('https://media.istockphoto.com/id/1497187133/es/foto/variedad-de-verduras-frescas-en-la-secci%C3%B3n-refrigerada-del-supermercado.jpg?s=612x612&w=0&k=20&c=5c9DkLqVXpqV3DaiwwSfUiHAT3QeUIjQK6vRAhnv-_w=') center / cover no-repeat,
-    var(--rojo); /* color de respaldo si la imagen no carga */
+    var(--rojo); 
   padding: 5rem 1.5rem;
   text-align: center;
   font-family: 'Segoe UI', system-ui, sans-serif;
@@ -195,3 +186,22 @@
 @media (max-width: 640px) {
   .banner { padding: 3.5rem 1.2rem; }
 }
+
+:root {
+  --green: #ae2929;        
+  --green-dark: #7d1c1c;   
+  --green-soft: #fff3e6;   
+  --orange: #f77f00;
+}
+
+.product-image-wrap,
+.dialog-image { background: #fff8f1; }
+
+.detail-button { border-color: #f3c9a8; }
+
+.spinner { border-color: #f6dcc6; border-top-color: var(--green); }
+
+.product-card:hover { box-shadow: 0 12px 30px rgba(174, 41, 41, .15); }
+
+.product-dialog { box-shadow: 0 25px 90px rgba(60, 15, 10, .35); }
+.product-dialog::backdrop { background: rgba(60, 15, 10, .5); }
