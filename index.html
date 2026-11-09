@@ -49,6 +49,34 @@
         <span id="product-count" class="product-count">Cargando productos…</span>
       </div>
 
+      <!-- Apartado por categorías (inciso 11) -->
+      <div class="category-section">
+        <h3 class="filter-title">Compra por categoría</h3>
+        <div id="category-list" class="category-list" role="group" aria-label="Categorías">
+          <button type="button" class="category-chip" aria-pressed="true" data-id="">🛒 Todas</button>
+        </div>
+      </div>
+
+      <!-- Filtros por marca y precio (inciso 10) -->
+      <form id="filters" class="filters" autocomplete="off">
+        <label class="filter-field">
+          <span>Marca</span>
+          <select id="filter-brand">
+            <option value="">Todas las marcas</option>
+          </select>
+        </label>
+        <label class="filter-field">
+          <span>Precio mínimo</span>
+          <input id="filter-min" type="number" min="0" step="0.01" inputmode="decimal" placeholder="$ 0">
+        </label>
+        <label class="filter-field">
+          <span>Precio máximo</span>
+          <input id="filter-max" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Sin límite">
+        </label>
+        <button type="button" id="filter-clear" class="clear-button">Limpiar filtros</button>
+      </form>
+      <p id="filter-error" class="filter-error" role="alert" hidden></p>
+
       <div id="catalog-status" class="status" role="status" aria-live="polite">
         <span class="spinner" aria-hidden="true"></span>
         <span>Cargando catálogo…</span>
