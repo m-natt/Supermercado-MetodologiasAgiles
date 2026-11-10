@@ -1,0 +1,203 @@
+/* =====================================================
+   diseno.css — Diseño "Supermercado Bonito :3"
+   Se carga DESPUÉS de styles.css.
+   Las clases .hero y .footer del diseño se renombraron a
+   .banner y .pie para no chocar con las de styles.css.
+   ===================================================== */
+
+:root {
+  --rojo: #ae2929;
+  --naranja: #f77f00;
+  --crema: #fff3e6;
+  --naranja-oscuro: #aa4615;
+}
+
+/* Reset limitado SOLO a las secciones del diseño
+   (así no afecta al catálogo) */
+.header *,
+.banner *,
+.categorias *,
+.pie {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ---------- Header ---------- */
+.header {
+  background: var(--rojo);
+  padding: 1rem 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 6px solid var(--naranja);
+  box-shadow: 0 4px 6px -2px rgba(0, 0, 0, .15);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.logo {
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.buscador-contenedor {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: 2.5rem; /* corregido: antes decía "2.5 rem" con espacio */
+}
+
+.buscador__icono {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: .9rem;
+  pointer-events: none;
+}
+
+.buscador {
+  width: 100%;
+  padding: .7rem 1.2rem .7rem 2.7rem;
+  border: none;
+  border-radius: 50px;
+  outline: none;
+  font-size: .95rem;
+}
+
+.header__acciones {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.carrito,
+.usuario {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: .95rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  transition: opacity .25s;
+}
+
+.carrito:hover,
+.usuario:hover { opacity: .85; }
+
+.usuario__icono,
+.carrito__icono {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+/* ---------- Banner (antes .hero) ---------- */
+.banner {
+  background:
+    linear-gradient(120deg, rgba(214, 40, 40, .8), rgba(247, 127, 0, .6)),
+    url('https://media.istockphoto.com/id/1497187133/es/foto/variedad-de-verduras-frescas-en-la-secci%C3%B3n-refrigerada-del-supermercado.jpg?s=612x612&w=0&k=20&c=5c9DkLqVXpqV3DaiwwSfUiHAT3QeUIjQK6vRAhnv-_w=') center / cover no-repeat,
+    var(--rojo); /* color de respaldo si la imagen no carga */
+  padding: 5rem 1.5rem;
+  text-align: center;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.banner__titulo {
+  color: #fff;
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  margin-bottom: .8rem;
+}
+
+.banner__texto {
+  color: #fff3e6;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  margin-bottom: 2rem;
+}
+
+.banner__cta {
+  display: inline-block;
+  background: #fff;
+  color: var(--rojo);
+  padding: .9rem 2.5rem;
+  border-radius: 50px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform .25s, box-shadow .25s;
+}
+
+.banner__cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .25);
+}
+
+/* ---------- Categorías ---------- */
+.categorias {
+  padding: 3rem 5%;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.seccion-titulo {
+  color: var(--rojo);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.categorias__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+.categoria {
+  background: var(--crema);
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--naranja-oscuro);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .25s, background .25s;
+}
+
+.categoria:hover {
+  transform: translateY(-4px);
+  background: #ffe1c7;
+}
+
+/* ---------- Pie de página (antes .footer) ---------- */
+.pie {
+  background: var(--rojo);
+  color: #ffd8c2;
+  text-align: center;
+  padding: 1.5rem 5%;
+  font-size: .9rem;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+@media (max-width: 640px) {
+  .banner { padding: 3.5rem 1.2rem; }
+}
+/* El catálogo adopta los colores del diseño */
+:root {
+  --green: #ae2929;
+  --green-dark: #7d1c1c;
+  --green-soft: #fff3e6;
+}
