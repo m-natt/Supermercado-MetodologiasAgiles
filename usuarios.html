@@ -40,6 +40,17 @@ th{background:#e9e9f4}
 .inactive{color:red}
 .permission{display:flex;gap:8px;align-items:center;margin:10px 0}
 .permission input{width:auto;margin:0}
+/* ===== Cuentas de clientes (registro e inicio de sesión) ===== */
+.link-button{background:none;color:#6259dc;padding:0;font-weight:bold;text-decoration:underline}
+.switch{margin:18px 0 0;text-align:center;font-size:14px}
+.hint{display:block;margin:-10px 0 15px;color:#666;font-size:12px}
+.success{color:#1f7a45;font-size:13px}
+.welcome{display:grid;gap:4px;margin:18px 0;padding:15px;border-radius:10px;background:#f3f2ff}
+.welcome span{font-size:14px;color:#555;overflow-wrap:anywhere}
+.client-actions{display:grid;gap:8px}
+.client-actions a{display:block;text-align:center;text-decoration:none;border-radius:7px;padding:10px 15px}
+button:disabled{opacity:.6;cursor:wait}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #6259dc;outline-offset:2px}
 @media(max-width:700px){
  .app{display:block}.sidebar{width:100%;display:flex;flex-wrap:wrap;gap:5px}
  .sidebar h2{width:100%}.sidebar button{width:auto;margin:2px}
@@ -47,22 +58,70 @@ th{background:#e9e9f4}
  .table-wrap{overflow-x:auto}
 }
 </style>
+<!-- Sin defer: el script de abajo los usa al cargar -->
+<script src="js/config.js"></script>
+<script src="js/sesion.js"></script>
 </head>
 <body>
 
 <div id="login" class="login">
- <div class="login-box">
+ <!-- Inicio de sesión: clientes (correo) y personal (usuario) -->
+ <div id="loginBox" class="login-box">
   <h1>Mi Tienda</h1>
   <p>Inicia sesión en el sistema</p>
   <form id="loginForm">
-   <label>Usuario</label>
-   <input id="loginUser" required>
-   <label>Contraseña</label>
-   <input id="loginPass" type="password" required>
-   <button class="primary" style="width:100%">Entrar</button>
+   <label for="loginUser">Correo o usuario</label>
+   <input id="loginUser" required autocomplete="username" maxlength="150">
+   <small class="hint">Clientes: usa tu correo. Personal: tu nombre de usuario.</small>
+   <label for="loginPass">Contraseña</label>
+   <input id="loginPass" type="password" required autocomplete="current-password" maxlength="128">
+   <button id="loginButton" class="primary" style="width:100%">Entrar</button>
   </form>
-  <p id="loginError" class="error"></p>
-  <small>Usuario inicial: admin<br>Contraseña: Admin123!</small>
+  <p id="loginError" class="error" role="alert"></p>
+  <p id="loginInfo" class="success" role="status"></p>
+  <p class="switch">¿Eres cliente nuevo? <button type="button" class="link-button" onclick="showAuth('register')">Crea tu cuenta</button></p>
+  <p class="switch"><a href="index.html">← Volver a la tienda</a></p>
+ </div>
+
+ <!-- Registro de clientes -->
+ <div id="registerBox" class="login-box hidden">
+  <h1>Crear cuenta</h1>
+  <p>Regístrate para comprar más rápido y proteger tus datos.</p>
+  <form id="registerForm">
+   <label for="regName">Nombre *</label>
+   <input id="regName" required maxlength="100" autocomplete="given-name">
+   <label for="regLastName">Apellidos</label>
+   <input id="regLastName" maxlength="100" autocomplete="family-name">
+   <label for="regEmail">Correo electrónico *</label>
+   <input id="regEmail" type="email" required maxlength="150" autocomplete="email">
+   <label for="regPhone">Teléfono *</label>
+   <input id="regPhone" type="tel" required pattern="[0-9 ]{10,20}" maxlength="20" inputmode="tel"
+          autocomplete="tel" title="Escribe al menos 10 dígitos" placeholder="10 dígitos">
+   <label for="regPass">Contraseña *</label>
+   <input id="regPass" type="password" required minlength="8" maxlength="128" autocomplete="new-password">
+   <small class="hint">Mínimo 8 caracteres, con al menos una letra y un número.</small>
+   <label for="regPass2">Repite la contraseña *</label>
+   <input id="regPass2" type="password" required minlength="8" maxlength="128" autocomplete="new-password">
+   <button id="registerButton" class="primary" style="width:100%">Crear cuenta</button>
+  </form>
+  <p id="registerError" class="error" role="alert"></p>
+  <p class="switch">¿Ya tienes cuenta? <button type="button" class="link-button" onclick="showAuth('login')">Inicia sesión</button></p>
+ </div>
+
+ <!-- Cliente con sesión iniciada -->
+ <div id="clientBox" class="login-box hidden">
+  <h1 id="clientHello">¡Hola!</h1>
+  <p>Iniciaste sesión como cliente.</p>
+  <div class="welcome">
+   <strong id="clientName"></strong>
+   <span id="clientEmail"></span>
+   <span id="clientPhone"></span>
+  </div>
+  <div class="client-actions">
+   <a class="primary" href="index.html#catalogo">Ir a comprar</a>
+   <a class="secondary" href="checkout.html">Ver mi carrito</a>
+   <button type="button" class="secondary" onclick="clientLogout()">Cerrar sesión</button>
+  </div>
  </div>
 </div>
 
@@ -190,8 +249,118 @@ function getRole(id){return roles.find(r=>r.id===id)}
 function isAdmin(){return current && getRole(current.roleId)?.roles}
 function has(permission){return current && getRole(current.roleId)?.[permission]===true}
 
+/* ===== Cuentas de clientes (backend + MySQL, contraseñas con pwdlib) ===== */
+function showAuth(view){
+ ["loginBox","registerBox","clientBox"].forEach(id=>$(id).classList.add("hidden"));
+ $({login:"loginBox",register:"registerBox",client:"clientBox"}[view]).classList.remove("hidden");
+ $("loginError").textContent="";$("registerError").textContent="";
+ if(view!=="login")$("loginInfo").textContent="";
+}
+
+function showClient(cliente){
+ $("clientHello").textContent="¡Hola, "+cliente.nombre+"!";
+ $("clientName").textContent=[cliente.nombre,cliente.apellidos].filter(Boolean).join(" ");
+ $("clientEmail").textContent="✉️ "+cliente.correo;
+ $("clientPhone").textContent=cliente.telefono?"📞 "+cliente.telefono:"";
+ showAuth("client");
+}
+
+// Llama al backend y devuelve data, o lanza un Error con el mensaje para el usuario
+async function api(path,options={}){
+ let response;
+ try{
+  response=await fetch(API_BASE+path,{...options,headers:Sesion.cabeceras({"Content-Type":"application/json",...(options.headers||{})})});
+ }catch{
+  throw new Error("No pudimos conectar con el servidor. Verifica que el backend esté encendido.");
+ }
+ let result=null;
+ try{result=await response.json()}catch{}
+ if(!response.ok||result?.ok!==true){
+  const error=new Error(response.status===422
+   ?"Revisa tus datos: hay campos con un formato no válido."
+   :(result?.error||"Ocurrió un error ("+response.status+")."));
+  error.status=response.status;
+  throw error;
+ }
+ return result.data;
+}
+
+function busy(button,text){
+ button.dataset.label??=button.textContent;
+ button.disabled=!!text;
+ button.textContent=text||button.dataset.label;
+}
+
+async function clientLogin(correo,contrasena){
+ busy($("loginButton"),"Entrando…");
+ try{
+  const sesion=await api("/api/clientes/login",{method:"POST",body:JSON.stringify({correo,contrasena})});
+  Sesion.guardar(sesion);
+  $("loginForm").reset();
+  showClient(sesion.cliente);
+ }catch(err){
+  $("loginError").textContent=err.status===422?"Correo o contraseña incorrectos.":err.message;
+ }finally{
+  busy($("loginButton"));
+ }
+}
+
+$("registerForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const pass=$("regPass").value;
+ if(pass!==$("regPass2").value)return $("registerError").textContent="Las contraseñas no coinciden.";
+ if(!/[a-zA-ZÀ-ÿ]/.test(pass)||!/[0-9]/.test(pass))return $("registerError").textContent="La contraseña debe tener al menos una letra y un número.";
+ $("registerError").textContent="";
+ busy($("registerButton"),"Creando cuenta…");
+ try{
+  const sesion=await api("/api/clientes/registro",{method:"POST",body:JSON.stringify({
+   nombre:$("regName").value.trim(),
+   apellidos:$("regLastName").value.trim()||null,
+   correo:$("regEmail").value.trim(),
+   telefono:$("regPhone").value.trim(),
+   contrasena:pass
+  })});
+  Sesion.guardar(sesion);
+  $("registerForm").reset();
+  showClient(sesion.cliente);
+ }catch(err){
+  $("registerError").textContent=err.message;
+ }finally{
+  busy($("registerButton"));
+ }
+});
+
+async function clientLogout(){
+ try{await api("/api/clientes/logout",{method:"POST"})}catch{/* se cierra igual en este navegador */}
+ Sesion.borrar();
+ showAuth("login");
+ $("loginInfo").textContent="Cerraste sesión.";
+}
+
+// Si ya había sesión, se confirma con el backend que siga vigente
+(async()=>{
+ const sesion=Sesion.leer();
+ if(!sesion)return;
+ showClient(sesion.cliente);
+ try{
+  const cliente=await api("/api/clientes/yo");
+  Sesion.guardar({token:sesion.token,cliente});
+  showClient(cliente);
+ }catch(err){
+  if(err.status===401){
+   Sesion.borrar();
+   showAuth("login");
+   $("loginInfo").textContent="Tu sesión expiró. Inicia sesión de nuevo.";
+  }
+ }
+})();
+
+/* ===== Personal de la tienda (sistema original) ===== */
 $("loginForm").addEventListener("submit",e=>{
  e.preventDefault();
+ $("loginError").textContent="";$("loginInfo").textContent="";
+ // Con "@" es un correo: inicia sesión como cliente en el backend
+ if($("loginUser").value.includes("@"))return clientLogin($("loginUser").value.trim(),$("loginPass").value);
  const username=$("loginUser").value.trim().toLowerCase();
  const password=$("loginPass").value;
  const user=users.find(u=>u.username.toLowerCase()===username && u.password===password && u.active);
@@ -208,8 +377,8 @@ function logout(){
  current=null;
  $("app").classList.add("hidden");
  $("login").classList.remove("hidden");
+ showAuth("login");
  $("loginPass").value="";
- $("loginError").textContent="";
 }
 
 function showPage(page){

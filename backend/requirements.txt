@@ -3,3 +3,4 @@ uvicorn
 pymysql
 cryptography
 python-dotenv
+pwdlib[argon2]

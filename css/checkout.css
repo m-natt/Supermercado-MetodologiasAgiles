@@ -147,6 +147,9 @@
 .remove-button:hover:not(:disabled) { color: var(--green); }
 
 /* ---------- Formulario ---------- */
+.session-note { margin: -6px 0 16px; padding: 10px 12px; border-radius: 10px; background: var(--green-soft); font-size: 14px; }
+.session-note a { color: var(--green); font-weight: 750; }
+.field input:read-only:not([type="radio"]) { background: #f6f3f1; color: var(--muted); }
 .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
 .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: var(--ink); }
 .field--wide { grid-column: 1 / -1; }

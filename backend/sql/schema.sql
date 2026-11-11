@@ -18,8 +18,18 @@ CREATE TABLE clientes (
   apellidos VARCHAR(100),
   correo VARCHAR(150) NOT NULL UNIQUE,
   telefono VARCHAR(20),
-  contrasena VARCHAR(255) NOT NULL,
+  contrasena VARCHAR(255) NOT NULL, -- hash Argon2 (pwdlib); "!" = cliente invitado sin contraseña
   fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE sesiones (
+  id_sesion INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+  id_cliente INT NOT NULL,
+  -- Solo se guarda el hash SHA-256 del token, nunca el token
+  token_hash CHAR(64) NOT NULL UNIQUE,
+  creada DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expira DATETIME NOT NULL,
+  FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE
 );
 
 CREATE TABLE direcciones (

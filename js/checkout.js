@@ -134,7 +134,10 @@ function setSending(value) {
   sending = value;
   submitButton.disabled = value;
   submitButton.textContent = value ? "Enviando pedido…" : "Confirmar pedido";
-  form.querySelectorAll("input").forEach(input => { input.readOnly = value; });
+  form.querySelectorAll("input").forEach(input => {
+    // El correo sigue bloqueado si hay sesión iniciada
+    input.readOnly = value || (input.name === "correo" && sessionApplied);
+  });
   render();
 }
 
@@ -175,11 +178,17 @@ form.addEventListener("submit", async event => {
   try {
     const response = await fetch(`${API_BASE}/api/pedidos`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      // Con sesión iniciada manda el token: el pedido queda en la cuenta del cliente
+      headers: Sesion.cabeceras({ "Content-Type": "application/json" }),
       body: JSON.stringify(payload),
     });
     let result = null;
     try { result = await response.json(); } catch { /* respuesta sin JSON */ }
+    if (response.status === 401) {
+      Sesion.borrar();
+      applySession();
+      throw new Error("Tu sesión expiró. Inicia sesión de nuevo o compra como invitado.");
+    }
     if (!response.ok || result?.ok !== true || !result.data) {
       throw new Error(result?.error || `El servidor respondió con estado ${response.status}.`);
     }
@@ -198,6 +207,37 @@ form.addEventListener("submit", async event => {
     errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 });
+
+// Con sesión iniciada: rellena los datos del cliente y bloquea el correo
+const sessionNote = document.getElementById("session-note");
+const sessionFields = ["nombre", "apellidos", "correo", "telefono"];
+let sessionApplied = false;
+
+function applySession() {
+  const sesion = Sesion.leer();
+  const correo = form.elements.correo;
+  sessionNote.replaceChildren();
+  if (!sesion) {
+    correo.readOnly = false;
+    if (sessionApplied) sessionFields.forEach(name => { form.elements[name].value = ""; });
+    sessionApplied = false;
+    const link = makeText("a", "", "Inicia sesión");
+    link.href = "usuarios.html";
+    sessionNote.append("¿Ya tienes cuenta? ", link, " para usar tus datos guardados.");
+    return;
+  }
+  const c = sesion.cliente;
+  sessionFields.forEach(name => {
+    if (!form.elements[name].value || name === "correo") form.elements[name].value = c[name] || "";
+  });
+  correo.readOnly = true;
+  sessionApplied = true;
+  const link = makeText("a", "", "¿No eres tú?");
+  link.href = "usuarios.html";
+  sessionNote.append(`Comprando como ${c.nombre} (${c.correo}). `, link);
+}
+
+applySession();
 
 // Si el carrito cambia en otra pestaña, refresca esta
 window.addEventListener("storage", event => {

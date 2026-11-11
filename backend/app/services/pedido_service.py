@@ -66,10 +66,14 @@ def _armar_lineas(items, productos):
 
 
 def _obtener_o_crear_cliente(cursor, cliente):
-    cursor.execute("SELECT id_cliente FROM clientes WHERE correo = %s", (cliente.correo,))
+    """Cliente para una compra SIN sesión iniciada."""
+    cursor.execute("SELECT id_cliente, contrasena FROM clientes WHERE correo = %s", (cliente.correo,))
     fila = cursor.fetchone()
     if fila:
-        # Ya existe: no se modifican sus datos desde un pedido sin sesión
+        if fila["contrasena"] != CONTRASENA_INVITADO:
+            # Es una cuenta registrada: sin sesión, nadie puede comprar a su nombre
+            raise PedidoInvalido("Ya existe una cuenta con ese correo. Inicia sesión para comprar con ella.")
+        # Invitado que ya había comprado: no se modifican sus datos
         return fila["id_cliente"]
     cursor.execute(
         """INSERT INTO clientes (nombre, apellidos, correo, telefono, contrasena)
@@ -79,7 +83,8 @@ def _obtener_o_crear_cliente(cursor, cliente):
     return cursor.lastrowid
 
 
-def crear(datos):
+def crear(datos, cliente_sesion=None):
+    """cliente_sesion: el cliente con sesión iniciada, o None si compra como invitado."""
     with transaccion() as cursor:
         productos = _bloquear_productos(cursor, [item.id_producto for item in datos.items])
         lineas = _armar_lineas(datos.items, productos)
@@ -88,7 +93,10 @@ def crear(datos):
         costo_envio = calcular_envio(subtotal)
         total = subtotal + costo_envio
 
-        id_cliente = _obtener_o_crear_cliente(cursor, datos.cliente)
+        if cliente_sesion:
+            id_cliente = cliente_sesion["id_cliente"]
+        else:
+            id_cliente = _obtener_o_crear_cliente(cursor, datos.cliente)
 
         d = datos.direccion
         cursor.execute(
@@ -131,7 +139,8 @@ def crear(datos):
         "cliente": {
             "nombre": datos.cliente.nombre,
             "apellidos": datos.cliente.apellidos,
-            "correo": datos.cliente.correo,
+            # Con sesión, el pedido es de la cuenta aunque se escriba otro correo
+            "correo": cliente_sesion["correo"] if cliente_sesion else datos.cliente.correo,
         },
         "direccion": d.model_dump(),
         "items": lineas,
