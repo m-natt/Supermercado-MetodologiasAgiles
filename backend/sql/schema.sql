@@ -100,3 +100,17 @@ CREATE TABLE pagos (
   fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido)
 );
+
+
+CREATE TABLE zonas_cobertura (
+  codigo_postal VARCHAR(5) NOT NULL PRIMARY KEY,
+  ciudad VARCHAR(100) NOT NULL,
+  costo_envio DECIMAL(8,2) NOT NULL DEFAULT 0,
+  tiempo_estimado_min INT,
+  activo TINYINT(1) NOT NULL DEFAULT 1
+);
+
+INSERT INTO zonas_cobertura (codigo_postal, ciudad, costo_envio, tiempo_estimado_min) VALUES
+('64000', 'Monterrey', 35.00, 45),
+('64640', 'Monterrey', 45.00, 60),
+('66220', 'San Pedro Garza García', 60.00, 75);
