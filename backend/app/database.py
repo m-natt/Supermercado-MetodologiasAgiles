@@ -1,4 +1,5 @@
 import os
+from contextlib import contextmanager
 
 import pymysql
 from dotenv import load_dotenv
@@ -37,6 +38,26 @@ def ejecutar(sql, params=None):
             cursor.execute(sql, params)
             conexion.commit()
             return cursor.lastrowid
+    except Exception:
+        conexion.rollback()
+        raise
+    finally:
+        conexion.close()
+
+
+@contextmanager
+def transaccion():
+    """Varias consultas que se guardan todas juntas o ninguna.
+
+    with transaccion() as cursor:
+        cursor.execute(...)
+        cursor.execute(...)
+    """
+    conexion = conectar()
+    try:
+        with conexion.cursor() as cursor:
+            yield cursor
+        conexion.commit()
     except Exception:
         conexion.rollback()
         raise

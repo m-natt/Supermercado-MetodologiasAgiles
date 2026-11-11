@@ -4,43 +4,59 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Catálogo de productos del supermercado">
-  <title>Supermercado Equipo 6 | Catálogo</title>
+  <title>Supermercado Bonito :3 | Catálogo</title>
+  <!-- Primero los estilos del catálogo, después los del diseño -->
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/diseno.css">
+  <link rel="stylesheet" href="css/checkout.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/carrito.js" defer></script>
   <script src="js/catalogo.js" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="#" aria-label="Supermercado Equipo 6, inicio">
-      <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 48 48" role="img" focusable="false">
-          <path d="M7 10h5l4.2 20.2a4 4 0 0 0 3.9 3.2h17.2a4 4 0 0 0 3.8-2.8L45 17H15" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M19 23h20M21 17l2 13m11-13-2 13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-          <circle cx="21" cy="40" r="3" fill="currentColor"/>
-          <circle cx="37" cy="40" r="3" fill="currentColor"/>
-        </svg>
-      </span>
-      <span class="brand-name">Supermercado <span class="brand-accent">Equipo 6</span></span>
-    </a>
-    <span class="topbar-note">Tu supermercado de confianza</span>
+
+  <!-- ===== DISEÑO: encabezado ===== -->
+  <header class="header">
+    <a href="#" class="logo">Supermercado Bonito :3</a>
+    <div class="buscador-contenedor">
+      <span class="buscador__icono">🔍</span>
+      <input type="text" class="buscador" placeholder="Buscar productos...">
+    </div>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario">
+        <span class="usuario__icono">👤</span>
+        Mi cuenta
+      </a>
+      <a href="checkout.html" class="carrito">
+        <span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span>
+      </a>
+    </div>
   </header>
 
-  <main class="container">
-    <section class="hero">
-      <div>
-        <p class="eyebrow">FRESCO · CERCA · PARA TI</p>
-        <h1>Todo lo que necesitas,<br><span>en un solo lugar.</span></h1>
-        <p class="hero-copy">Explora nuestro catálogo y descubre los productos disponibles.</p>
-      </div>
-      <div class="hero-art" aria-hidden="true">
-        <span class="hero-circle circle-one"></span>
-        <span class="hero-circle circle-two"></span>
-        <span class="basket">🛒</span>
-        <span class="floating fruit">🍊</span>
-        <span class="floating leaf">🥬</span>
-      </div>
-    </section>
+  <!-- ===== DISEÑO: banner principal ===== -->
+  <section class="banner">
+    <h1 class="banner__titulo">¡Las mejores ofertas de la semana!</h1>
+    <p class="banner__texto">Frutas, verduras y todo lo que necesitas al mejor precio.</p>
+    <a href="#catalogo" class="banner__cta">Ver ofertas</a>
+  </section>
 
-    <section class="catalog-section" aria-labelledby="catalog-title">
+  <!-- ===== DISEÑO: categorías ===== -->
+  <section class="categorias">
+    <h2 class="seccion-titulo">Categorías</h2>
+    <div class="categorias__grid">
+      <div class="categoria">🍎 Frutas</div>
+      <div class="categoria">🥦 Verduras</div>
+      <div class="categoria">🥛 Lácteos</div>
+      <div class="categoria">🍞 Panadería</div>
+      <div class="categoria">🥤 Bebidas</div>
+      <div class="categoria">🍿 Snacks</div>
+    </div>
+  </section>
+
+  <!-- ===== CATÁLOGO ORIGINAL (no cambiar los id: los usa js/catalogo.js) ===== -->
+  <main class="container">
+    <section class="catalog-section" id="catalogo" aria-labelledby="catalog-title">
       <div class="section-heading">
         <div>
           <p class="eyebrow">DESCUBRE NUESTRA SELECCIÓN</p>
@@ -48,6 +64,34 @@
         </div>
         <span id="product-count" class="product-count">Cargando productos…</span>
       </div>
+
+      <!-- Apartado por categorías (inciso 11) -->
+      <div class="category-section">
+        <h3 class="filter-title">Compra por categoría</h3>
+        <div id="category-list" class="category-list" role="group" aria-label="Categorías">
+          <button type="button" class="category-chip" aria-pressed="true" data-id="">🛒 Todas</button>
+        </div>
+      </div>
+
+      <!-- Filtros por marca y precio (inciso 10) -->
+      <form id="filters" class="filters" autocomplete="off">
+        <label class="filter-field">
+          <span>Marca</span>
+          <select id="filter-brand">
+            <option value="">Todas las marcas</option>
+          </select>
+        </label>
+        <label class="filter-field">
+          <span>Precio mínimo</span>
+          <input id="filter-min" type="number" min="0" step="0.01" inputmode="decimal" placeholder="$ 0">
+        </label>
+        <label class="filter-field">
+          <span>Precio máximo</span>
+          <input id="filter-max" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Sin límite">
+        </label>
+        <button type="button" id="filter-clear" class="clear-button">Limpiar filtros</button>
+      </form>
+      <p id="filter-error" class="filter-error" role="alert" hidden></p>
 
       <div id="catalog-status" class="status" role="status" aria-live="polite">
         <span class="spinner" aria-hidden="true"></span>
@@ -57,11 +101,12 @@
     </section>
   </main>
 
-  <footer class="footer">
-    <span>© <span id="year"></span> Supermercado Equipo 6</span>
-    <span>Catálogo de productos</span>
+  <!-- ===== DISEÑO: pie de página (conserva el id="year" que usa el JS) ===== -->
+  <footer class="pie">
+    © <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados
   </footer>
 
+  <!-- ===== CATÁLOGO ORIGINAL: ventana de detalle del producto ===== -->
   <dialog id="product-dialog" class="product-dialog">
     <button class="dialog-close" id="dialog-close" aria-label="Cerrar detalle">×</button>
     <div id="dialog-content"></div>

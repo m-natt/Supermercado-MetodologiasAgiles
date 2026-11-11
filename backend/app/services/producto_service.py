@@ -12,7 +12,8 @@ SELECT_PRODUCTO = """
 """
 
 
-def listar(id_categoria=None, incluir_inactivos=False):
+def listar(id_categoria=None, incluir_inactivos=False,
+           id_marca=None, precio_min=None, precio_max=None):
     condiciones = []
     params = []
     if not incluir_inactivos:
@@ -20,6 +21,15 @@ def listar(id_categoria=None, incluir_inactivos=False):
     if id_categoria is not None:
         condiciones.append("p.id_categoria = %s")
         params.append(id_categoria)
+    if id_marca is not None:
+        condiciones.append("p.id_marca = %s")
+        params.append(id_marca)
+    if precio_min is not None:
+        condiciones.append("p.precio >= %s")
+        params.append(precio_min)
+    if precio_max is not None:
+        condiciones.append("p.precio <= %s")
+        params.append(precio_max)
 
     sql = SELECT_PRODUCTO
     if condiciones:
