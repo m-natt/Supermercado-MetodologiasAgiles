@@ -3,10 +3,10 @@ from decimal import Decimal
 
 from app.database import transaccion
 
-# Reglas de envío (js/checkout.js muestra las mismas; si cambian aquí, cámbialas allá)
-COSTO_ENVIO = Decimal("49.00")
+# El costo y el tiempo de envío salen de la tabla zonas_cobertura (según el
+# código postal). Arriba de este monto el envío es gratis.
+# (js/checkout.js muestra la misma regla; si cambia aquí, cámbiala allá)
 ENVIO_GRATIS_DESDE = Decimal("500.00")
-DIAS_ENTREGA = 2
 
 # Los pedidos sin cuenta crean un cliente "invitado". Esta contraseña no es un
 # hash válido, así que esa cuenta no puede iniciar sesión hasta que se registre.
@@ -19,8 +19,24 @@ class PedidoInvalido(Exception):
     """El pedido no se puede crear (producto inexistente, sin stock, etc.)."""
 
 
-def calcular_envio(subtotal):
-    return Decimal("0.00") if subtotal >= ENVIO_GRATIS_DESDE else COSTO_ENVIO
+def calcular_envio(subtotal, costo_zona):
+    return Decimal("0.00") if subtotal >= ENVIO_GRATIS_DESDE else Decimal(costo_zona)
+
+
+def _zona_de_entrega(cursor, codigo_postal):
+    cursor.execute(
+        """SELECT ciudad, costo_envio, tiempo_estimado_min
+           FROM zonas_cobertura
+           WHERE codigo_postal = %s AND activo = 1""",
+        (codigo_postal,),
+    )
+    zona = cursor.fetchone()
+    if zona is None:
+        raise PedidoInvalido(
+            f"Por ahora no tenemos entrega en el código postal {codigo_postal}. "
+            "Revisa la cobertura en la página principal."
+        )
+    return zona
 
 
 def _bloquear_productos(cursor, ids):
@@ -89,8 +105,9 @@ def crear(datos, cliente_sesion=None):
         productos = _bloquear_productos(cursor, [item.id_producto for item in datos.items])
         lineas = _armar_lineas(datos.items, productos)
 
+        zona = _zona_de_entrega(cursor, datos.direccion.codigo_postal)
         subtotal = sum((linea["subtotal"] for linea in lineas), Decimal("0.00"))
-        costo_envio = calcular_envio(subtotal)
+        costo_envio = calcular_envio(subtotal, zona["costo_envio"])
         total = subtotal + costo_envio
 
         if cliente_sesion:
@@ -107,7 +124,8 @@ def crear(datos, cliente_sesion=None):
         id_direccion = cursor.lastrowid
 
         fecha = datetime.now().replace(microsecond=0)
-        fecha_entrega = fecha + timedelta(days=DIAS_ENTREGA)
+        minutos = zona["tiempo_estimado_min"]
+        fecha_entrega = fecha + timedelta(minutes=minutos) if minutos else None  # None = por confirmar
         cursor.execute(
             """INSERT INTO pedidos (id_cliente, id_direccion, fecha, estado, total, costo_envio, fecha_entrega)
                VALUES (%s, %s, %s, 'confirmado', %s, %s, %s)""",
@@ -135,6 +153,7 @@ def crear(datos, cliente_sesion=None):
         "estado": "confirmado",
         "fecha": fecha,
         "fecha_entrega": fecha_entrega,
+        "tiempo_estimado_min": minutos,
         "metodo_pago": datos.metodo_pago,
         "cliente": {
             "nombre": datos.cliente.nombre,

@@ -166,6 +166,9 @@
 }
 .field input:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; border-color: transparent; }
 .field input:user-invalid { border-color: #c0392b; background: #fff8f7; }
+.cp-status { min-height: 1em; font-size: 12px; font-weight: 600; color: var(--muted); }
+.cp-status.is-ok { color: #2e7d4f; }
+.cp-status.is-bad { color: #a12a1f; }
 
 .payment-options { display: grid; gap: 10px; }
 .payment-option {

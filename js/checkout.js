@@ -1,8 +1,8 @@
 // Página de checkout: muestra el carrito, pide datos y crea el pedido.
 // API_BASE, money() y makeText() vienen de js/config.js; Carrito de js/carrito.js
 
-// Mismas reglas que backend/app/services/pedido_service.py (el backend manda)
-const COSTO_ENVIO = 49;
+// Misma regla que backend/app/services/pedido_service.py (el backend manda).
+// El costo de envío depende de la zona: se consulta en /api/cobertura.
 const ENVIO_GRATIS_DESDE = 500;
 const ULTIMO_PEDIDO_KEY = "supermercado_ultimo_pedido";
 
@@ -20,8 +20,14 @@ const submitButton = document.getElementById("submit-order");
 
 let sending = false;
 
+// Zona del código postal escrito: null mientras no se sabe
+// o { cubierto, ciudad, costo_envio, tiempo_estimado_min }
+let zona = null;
+
+// Devuelve el costo de envío, o null si todavía no se conoce
 function shippingFor(subtotal) {
-  return subtotal >= ENVIO_GRATIS_DESDE ? 0 : COSTO_ENVIO;
+  if (subtotal >= ENVIO_GRATIS_DESDE) return 0;
+  return zona?.cubierto ? Number(zona.costo_envio) : null;
 }
 
 function showError(message) {
@@ -118,11 +124,14 @@ function render() {
   cartUnits.textContent = `${units} ${units === 1 ? "artículo" : "artículos"}`;
   productsLabel.textContent = `Productos (${units})`;
   subtotalLabel.textContent = money(subtotal);
-  shippingLabel.textContent = shipping === 0 ? "Gratis" : money(shipping);
-  totalLabel.textContent = money(subtotal + shipping);
-  shippingHint.textContent = shipping === 0
+  shippingLabel.textContent = shipping === null ? "Por calcular" : shipping === 0 ? "Gratis" : money(shipping);
+  totalLabel.textContent = money(subtotal + (shipping ?? 0));
+  const free = shipping === 0
     ? "🎉 Tu pedido tiene envío gratis."
     : `Agrega ${money(ENVIO_GRATIS_DESDE - subtotal)} más para obtener envío gratis.`;
+  shippingHint.textContent = zona?.cubierto
+    ? `🚚 Entrega en ${zona.ciudad}${zona.tiempo_estimado_min ? ` en aprox. ${zona.tiempo_estimado_min} min` : ""}. ${free}`
+    : shipping === 0 ? free : `Escribe tu código postal para calcular el envío. ${free}`;
 
   if (focusKey) {
     const target = cartList.querySelector(`[data-focus="${focusKey}"]`);
@@ -208,6 +217,51 @@ form.addEventListener("submit", async event => {
   }
 });
 
+// Cobertura: al escribir el código postal se consulta si hay entrega
+const cpInput = form.elements.codigo_postal;
+const cpStatus = document.getElementById("cp-status");
+let cpRequest = 0; // ignora respuestas viejas si el usuario sigue escribiendo
+
+function setCpStatus(text, kind = "") {
+  cpStatus.textContent = text;
+  cpStatus.className = `cp-status${kind ? ` is-${kind}` : ""}`;
+}
+
+async function checkCoverage() {
+  const cp = cpInput.value.trim();
+  const thisRequest = ++cpRequest;
+  zona = null;
+  cpInput.setCustomValidity("");
+  if (!/^\d{5}$/.test(cp)) {
+    setCpStatus("");
+    render();
+    return;
+  }
+  setCpStatus("Revisando cobertura…");
+  render();
+  try {
+    const response = await fetch(`${API_BASE}/api/cobertura/${encodeURIComponent(cp)}`);
+    const result = await response.json();
+    if (thisRequest !== cpRequest) return;
+    if (!response.ok || result.ok !== true) throw new Error();
+    zona = result.data;
+    if (zona.cubierto) {
+      setCpStatus(`✓ Sí llegamos a ${zona.ciudad}`, "ok");
+    } else {
+      // Bloquea el envío del formulario con este mensaje
+      cpInput.setCustomValidity("Por ahora no tenemos entrega en este código postal.");
+      setCpStatus("Por ahora no tenemos entrega en este código postal.", "bad");
+    }
+  } catch {
+    if (thisRequest !== cpRequest) return;
+    // Sin conexión no se bloquea: el backend lo vuelve a revisar al confirmar
+    setCpStatus("No pudimos revisar la cobertura ahora.");
+  }
+  render();
+}
+
+cpInput.addEventListener("input", checkCoverage);
+
 // Con sesión iniciada: rellena los datos del cliente y bloquea el correo
 const sessionNote = document.getElementById("session-note");
 const sessionFields = ["nombre", "apellidos", "correo", "telefono"];
@@ -238,6 +292,7 @@ function applySession() {
 }
 
 applySession();
+if (cpInput.value) checkCoverage(); // por si el navegador lo autocompletó
 
 // Si el carrito cambia en otra pestaña, refresca esta
 window.addEventListener("storage", event => {

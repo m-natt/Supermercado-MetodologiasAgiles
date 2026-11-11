@@ -10,7 +10,7 @@ formCobertura.addEventListener("submit", async (evento) => {
 
   try {
     // Le preguntamos al backend
-    const respuesta = await fetch(`${API_BASE}/api/cobertura/${cp}`);
+    const respuesta = await fetch(`${API_BASE}/api/cobertura/${encodeURIComponent(cp)}`);
     const resultado = await respuesta.json();
 
     // Si el CP estaba mal escrito, el backend manda error
@@ -23,7 +23,7 @@ formCobertura.addEventListener("submit", async (evento) => {
     if (zona.cubierto) {
       resultadoCP.textContent =
         `✅ ¡Sí llegamos a ${zona.ciudad}! Envío: $${zona.costo_envio} MXN, ` +
-        `aprox. ${zona.tiempo_estimado_min} minutos.`;
+        `aprox. ${zona.tiempo_estimado_min} minutos. (Gratis en compras desde $500)`;
     } else {
       resultadoCP.textContent = "😔 Por ahora no llegamos a ese código postal.";
     }

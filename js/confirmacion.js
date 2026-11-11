@@ -36,6 +36,12 @@ function formatDate(value, withTime = false) {
   }).format(date);
 }
 
+function formatTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("es-MX", { hour: "2-digit", minute: "2-digit" }).format(date);
+}
+
 function readOrder() {
   try {
     const order = JSON.parse(sessionStorage.getItem(ULTIMO_PEDIDO_KEY) || "null");
@@ -84,7 +90,10 @@ function showOrder(order) {
     "Guarda tu número de pedido para cualquier aclaración.";
   $("confirm-number").textContent = orderNumber(order.id_pedido);
 
-  $("confirm-delivery").textContent = formatDate(order.fecha_entrega);
+  $("confirm-delivery").textContent = order.fecha_entrega
+    ? `${formatDate(order.fecha_entrega)}, a las ${formatTime(order.fecha_entrega)}` +
+      (order.tiempo_estimado_min ? ` (en unos ${order.tiempo_estimado_min} min)` : "")
+    : "Por confirmar";
   const address = $("confirm-address");
   address.replaceChildren(
     makeText("span", "", d.calle),
