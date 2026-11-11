@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Revisa tu carrito y confirma tu pedido">
+  <title>Supermercado Bonito :3 | Finalizar compra</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/diseno.css">
+  <link rel="stylesheet" href="css/checkout.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/carrito.js" defer></script>
+  <script src="js/sesion.js" defer></script>
+  <script src="js/checkout.js" defer></script>
+</head>
+<body>
+
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario">
+        <span class="usuario__icono">👤</span>
+        Mi cuenta
+      </a>
+      <a href="checkout.html" class="carrito" aria-current="page">
+        <span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container checkout-page">
+    <a href="index.html" class="back-link">← Seguir comprando</a>
+
+    <ol class="steps" aria-label="Pasos de la compra">
+      <li class="step is-current" aria-current="step"><span>1</span> Carrito y datos</li>
+      <li class="step"><span>2</span> Confirmación</li>
+    </ol>
+
+    <h1 class="page-title">Finalizar compra</h1>
+
+    <!-- Se muestra si el carrito está vacío -->
+    <section id="checkout-empty" class="panel empty-cart" hidden>
+      <span class="empty-cart__icon" aria-hidden="true">🧺</span>
+      <h2>Tu carrito está vacío</h2>
+      <p>Agrega productos desde el catálogo para hacer tu pedido.</p>
+      <a href="index.html#catalogo" class="primary-button">Ver catálogo</a>
+    </section>
+
+    <form id="checkout-form" class="checkout-layout" autocomplete="on" hidden>
+      <div class="checkout-main">
+
+        <section class="panel" aria-labelledby="cart-title">
+          <div class="panel__head">
+            <h2 id="cart-title">Tu carrito</h2>
+            <span id="cart-units" class="product-count"></span>
+          </div>
+          <ul id="cart-list" class="cart-list"></ul>
+        </section>
+
+        <section class="panel" aria-labelledby="contact-title">
+          <h2 id="contact-title">Datos de contacto</h2>
+          <p id="session-note" class="session-note">
+            ¿Ya tienes cuenta? <a href="usuarios.html">Inicia sesión</a> para usar tus datos guardados.
+          </p>
+          <div class="field-grid">
+            <label class="field">
+              <span>Nombre *</span>
+              <input name="nombre" required maxlength="100" autocomplete="given-name">
+            </label>
+            <label class="field">
+              <span>Apellidos</span>
+              <input name="apellidos" maxlength="100" autocomplete="family-name">
+            </label>
+            <label class="field">
+              <span>Correo electrónico *</span>
+              <input name="correo" type="email" required maxlength="150" autocomplete="email">
+            </label>
+            <label class="field">
+              <span>Teléfono *</span>
+              <input name="telefono" type="tel" required pattern="[0-9 ]{10,20}" maxlength="20"
+                     inputmode="tel" autocomplete="tel" title="Escribe al menos 10 dígitos" placeholder="10 dígitos">
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="address-title">
+          <h2 id="address-title">Dirección de entrega</h2>
+          <div class="field-grid">
+            <label class="field field--wide">
+              <span>Calle y número *</span>
+              <input name="calle" required maxlength="150" autocomplete="address-line1">
+            </label>
+            <label class="field">
+              <span>Colonia *</span>
+              <input name="colonia" required maxlength="100" autocomplete="address-line2">
+            </label>
+            <label class="field">
+              <span>Ciudad *</span>
+              <input name="ciudad" required maxlength="100" autocomplete="address-level2">
+            </label>
+            <label class="field">
+              <span>Código postal *</span>
+              <input name="codigo_postal" required pattern="[0-9]{5}" maxlength="5"
+                     inputmode="numeric" autocomplete="postal-code" title="5 dígitos">
+            </label>
+            <label class="field field--wide">
+              <span>Referencias</span>
+              <input name="referencias" maxlength="255" placeholder="Ej. casa azul, entre calle X y Y">
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="payment-title">
+          <h2 id="payment-title">Método de pago</h2>
+          <div class="payment-options">
+            <label class="payment-option">
+              <input type="radio" name="metodo_pago" value="efectivo" required checked>
+              <span class="payment-option__icon" aria-hidden="true">💵</span>
+              <span>
+                <strong>Efectivo al recibir</strong>
+                <small>Pagas al repartidor cuando llegue tu pedido.</small>
+              </span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="metodo_pago" value="tarjeta">
+              <span class="payment-option__icon" aria-hidden="true">💳</span>
+              <span>
+                <strong>Tarjeta al recibir</strong>
+                <small>El repartidor lleva terminal. No pedimos datos de tarjeta aquí.</small>
+              </span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="metodo_pago" value="transferencia">
+              <span class="payment-option__icon" aria-hidden="true">🏦</span>
+              <span>
+                <strong>Transferencia</strong>
+                <small>Te contactamos con los datos para transferir.</small>
+              </span>
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <aside class="panel summary" aria-labelledby="summary-title">
+        <h2 id="summary-title">Resumen del pedido</h2>
+        <dl class="summary__rows">
+          <div><dt id="summary-products-label">Productos</dt><dd id="summary-subtotal">$0.00</dd></div>
+          <div><dt>Envío</dt><dd id="summary-shipping">$0.00</dd></div>
+          <div class="summary__total"><dt>Total</dt><dd id="summary-total">$0.00</dd></div>
+        </dl>
+        <p id="shipping-hint" class="shipping-hint"></p>
+        <p id="checkout-error" class="form-error" role="alert" hidden></p>
+        <button type="submit" id="submit-order" class="primary-button primary-button--block">Confirmar pedido</button>
+        <p class="summary__note">Los precios y la disponibilidad se confirman al enviar tu pedido.</p>
+      </aside>
+    </form>
+  </main>
+
+  <footer class="pie">
+    © <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados
+  </footer>
+</body>
+</html>
