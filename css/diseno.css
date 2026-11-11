@@ -201,3 +201,34 @@
   --green-dark: #7d1c1c;
   --green-soft: #fff3e6;
 }
+
+.cobertura {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+.cobertura__form {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.cobertura__form input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+}
+.cobertura__form button {
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 8px;
+  background: #ff7a00;;
+  color: white;
+  cursor: pointer;
+}
+.cobertura__resultado {
+  margin-top: 15px;
+  font-weight: bold;
+}

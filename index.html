@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/diseno.css">
   <script src="js/catalogo.js" defer></script>
+  <script src="js/cobertura.js" defer></script>
 </head>
 <body>
 
@@ -35,6 +36,17 @@
     <h1 class="banner__titulo">¡Las mejores ofertas de la semana!</h1>
     <p class="banner__texto">Frutas, verduras y todo lo que necesitas al mejor precio.</p>
     <a href="#catalogo" class="banner__cta">Ver ofertas</a>
+  </section>
+
+    <!-- ===== SPRINT: verificación de cobertura ===== -->
+  <section class="cobertura">
+    <h2 class="seccion-titulo">¿Llegamos a tu casa? 🚚</h2>
+    <form id="form-cobertura" class="cobertura__form" autocomplete="off">
+      <input id="input-cp" type="text" inputmode="numeric" maxlength="5"
+             placeholder="Escribe tu código postal" required>
+      <button type="submit">Verificar</button>
+    </form>
+    <p id="resultado-cp" class="cobertura__resultado" role="status"></p>
   </section>
 
   <!-- ===== DISEÑO: categorías ===== -->
@@ -109,3 +121,4 @@
   </dialog>
 </body>
 </html>
+
