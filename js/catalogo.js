@@ -11,6 +11,10 @@ const maxInput = document.getElementById("filter-max");
 const clearButton = document.getElementById("filter-clear");
 const filtersForm = document.getElementById("filters");
 const filterError = document.getElementById("filter-error");
+const catalogSection = document.getElementById("catalogo");
+const catalogTitle = document.getElementById("catalog-title");
+const DEFAULT_TITLE = catalogTitle.textContent;
+let categoryName = ""; // nombre de la categoría seleccionada (para el título)
 
 // Filtros activos. Un valor vacío ("") significa "sin filtro".
 const filters = { categoria: "", marca: "", min: "", max: "" };
@@ -178,9 +182,11 @@ async function loadCatalog() {
 }
 
 /* ===== Categorías (inciso 11) ===== */
+// Las tarjetas de la sección "Categorías" (arriba de la página) se generan con las
+// categorías reales de la base de datos. Al hacer clic filtran el catálogo.
 const CATEGORY_ICONS = [
-  ["fruta", "🍎"], ["verdura", "🥬"], ["lacteo", "🥛"], ["carne", "🥩"], ["pollo", "🍗"],
-  ["pescado", "🐟"], ["marisco", "🦐"], ["panaderia", "🥖"], ["pan", "🍞"], ["bebida", "🥤"],
+  ["fruta", "🍎"], ["verdura", "🥦"], ["lacteo", "🥛"], ["carne", "🥩"], ["pollo", "🍗"],
+  ["pescado", "🐟"], ["marisco", "🦐"], ["panaderia", "🍞"], ["pan", "🍞"], ["bebida", "🥤"],
   ["jugo", "🧃"], ["botana", "🍿"], ["snack", "🍿"], ["dulce", "🍬"], ["galleta", "🍪"],
   ["limpieza", "🧴"], ["higiene", "🧼"], ["congelado", "🧊"], ["cereal", "🥣"],
   ["mascota", "🐾"], ["huevo", "🥚"], ["cerveza", "🍺"], ["licor", "🍷"], ["abarrote", "🧺"],
@@ -192,24 +198,42 @@ function categoryIcon(name) {
   return match ? match[1] : "🛒";
 }
 
-function markSelectedCategory() {
-  categoryList.querySelectorAll(".category-chip").forEach(chip => {
-    chip.setAttribute("aria-pressed", String(chip.dataset.id === filters.categoria));
-  });
+function updateCatalogTitle() {
+  catalogTitle.textContent = categoryName ? `${DEFAULT_TITLE} · ${categoryName}` : DEFAULT_TITLE;
 }
 
-function categoryChip(id, label) {
-  const chip = makeText("button", "category-chip", label);
-  chip.type = "button";
-  chip.dataset.id = String(id);
-  chip.setAttribute("aria-pressed", String(String(id) === filters.categoria));
-  chip.addEventListener("click", () => {
-    if (filters.categoria === String(id)) return; // ya está seleccionada
-    filters.categoria = String(id);
-    markSelectedCategory();
-    loadCatalog();
+function markSelectedCategory() {
+  categoryList.querySelectorAll(".categoria").forEach(card => {
+    const selected = card.dataset.id === filters.categoria;
+    card.classList.toggle("categoria--activa", selected);
+    card.setAttribute("aria-pressed", String(selected));
   });
-  return chip;
+  updateCatalogTitle();
+}
+
+function selectCategory(id, name) {
+  const sameOne = filters.categoria === String(id);
+  filters.categoria = sameOne ? "" : String(id); // segundo clic = quitar el filtro
+  categoryName = sameOne ? "" : name;
+  markSelectedCategory();
+  loadCatalog();
+  catalogSection.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function categoryCard(cat) {
+  const card = makeText("div", "categoria", `${categoryIcon(cat.nombre)} ${cat.nombre}`);
+  card.dataset.id = String(cat.id_categoria);
+  card.setAttribute("role", "button");
+  card.setAttribute("aria-pressed", "false");
+  card.tabIndex = 0;
+  card.addEventListener("click", () => selectCategory(cat.id_categoria, cat.nombre));
+  card.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      selectCategory(cat.id_categoria, cat.nombre);
+    }
+  });
+  return card;
 }
 
 async function loadCategories() {
@@ -218,12 +242,9 @@ async function loadCategories() {
     if (!response.ok) throw new Error();
     const result = await response.json();
     if (result.ok !== true || !Array.isArray(result.data)) throw new Error();
-    categoryList.replaceChildren(categoryChip("", "🛒 Todas"));
-    result.data.forEach(cat => {
-      categoryList.append(categoryChip(cat.id_categoria, `${categoryIcon(cat.nombre)} ${cat.nombre}`));
-    });
+    categoryList.replaceChildren(...result.data.map(categoryCard));
   } catch (error) {
-    // Si falla, el catálogo sigue funcionando con el botón "Todas"
+    // Si falla, el catálogo sigue funcionando sin filtro de categorías
   }
 }
 
@@ -292,6 +313,7 @@ filtersForm.addEventListener("submit", event => event.preventDefault());
 clearButton.addEventListener("click", () => {
   clearTimeout(priceTimer);
   filters.categoria = filters.marca = filters.min = filters.max = "";
+  categoryName = "";
   brandSelect.value = "";
   minInput.value = "";
   maxInput.value = "";

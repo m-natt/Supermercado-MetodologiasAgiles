@@ -71,13 +71,7 @@ h2 { margin:0; font-size:30px; letter-spacing:-1px; }
 @media (max-width:390px) { .product-grid { grid-template-columns:1fr; }.product-image-wrap { height:190px; } }
 
 /* ===== Categorías y filtros (incisos 10 y 11) ===== */
-.category-section { margin-bottom:18px; }
-.filter-title { margin:0 0 12px; color:var(--green); font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; }
-.category-list { display:flex; flex-wrap:wrap; gap:10px; }
-.category-chip { display:inline-flex; align-items:center; gap:8px; padding:9px 16px; border:1px solid #d6e7dc; border-radius:999px; background:#fff; color:var(--ink); font:inherit; font-size:13px; font-weight:700; cursor:pointer; transition:background .15s ease,color .15s ease,border-color .15s ease; }
-.category-chip:hover { background:var(--green-soft); }
-.category-chip[aria-pressed="true"] { border-color:var(--green); background:var(--green); color:#fff; }
-.category-chip:focus-visible,.filter-field select:focus-visible,.filter-field input:focus-visible,.clear-button:focus-visible { outline:2px solid var(--green); outline-offset:2px; }
+.filter-field select:focus-visible,.filter-field input:focus-visible,.clear-button:focus-visible { outline:2px solid var(--green); outline-offset:2px; }
 .filters { display:flex; flex-wrap:wrap; align-items:end; gap:14px; margin:0 0 22px; padding:16px 18px; background:#fff; border:1px solid var(--line); border-radius:15px; }
 .filter-field { display:flex; flex-direction:column; gap:6px; color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; }
 .filter-field select,.filter-field input { min-width:170px; padding:10px 12px; border:1px solid #d6e7dc; border-radius:9px; background:#fff; color:var(--ink); font:inherit; font-size:14px; font-weight:500; letter-spacing:0; text-transform:none; }
@@ -86,3 +80,5 @@ h2 { margin:0; font-size:30px; letter-spacing:-1px; }
 .filter-error { margin:-10px 0 18px; color:#a34d3f; font-size:13px; }
 @media (max-width:700px) { .filters { flex-direction:column; align-items:stretch; }.filter-field select,.filter-field input { width:100%; min-width:0; }.clear-button { margin-left:0; } }
 .status[hidden] { display: none; }
+.categorias .categoria--activa,.categorias .categoria--activa:hover { background:var(--rojo,var(--green)); color:#fff; }
+.categorias .categoria:focus-visible { outline:3px solid var(--naranja,#f77f00); outline-offset:2px; }

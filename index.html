@@ -56,14 +56,9 @@
   <!-- ===== DISEÑO: categorías ===== -->
   <section class="categorias">
     <h2 class="seccion-titulo">Categorías</h2>
-    <div class="categorias__grid">
-      <div class="categoria">🍎 Frutas</div>
-      <div class="categoria">🥦 Verduras</div>
-      <div class="categoria">🥛 Lácteos</div>
-      <div class="categoria">🍞 Panadería</div>
-      <div class="categoria">🥤 Bebidas</div>
-      <div class="categoria">🍿 Snacks</div>
-    </div>
+    <!-- Las tarjetas se generan en js/catalogo.js con las categorías de la base de datos.
+         Al hacer clic en una, se filtra el catálogo (clic otra vez para quitar el filtro). -->
+    <div id="category-list" class="categorias__grid" role="group" aria-label="Categorías"></div>
   </section>
 
   <!-- ===== CATÁLOGO ORIGINAL (no cambiar los id: los usa js/catalogo.js) ===== -->
@@ -75,14 +70,6 @@
           <h2 id="catalog-title">Catálogo de productos</h2>
         </div>
         <span id="product-count" class="product-count">Cargando productos…</span>
-      </div>
-
-      <!-- Apartado por categorías (inciso 11) -->
-      <div class="category-section">
-        <h3 class="filter-title">Compra por categoría</h3>
-        <div id="category-list" class="category-list" role="group" aria-label="Categorías">
-          <button type="button" class="category-chip" aria-pressed="true" data-id="">🛒 Todas</button>
-        </div>
       </div>
 
       <!-- Filtros por marca y precio (inciso 10) -->
