@@ -8,6 +8,9 @@
   <!-- Primero los estilos del catálogo, después los del diseño -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/diseno.css">
+  <link rel="stylesheet" href="css/checkout.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/carrito.js" defer></script>
   <script src="js/catalogo.js" defer></script>
 </head>
 <body>
@@ -24,8 +27,9 @@
         <span class="usuario__icono">👤</span>
         Mi cuenta
       </a>
-      <a href="#" class="carrito">
+      <a href="checkout.html" class="carrito">
         <span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span>
       </a>
     </div>
   </header>

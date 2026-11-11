@@ -1,5 +1,4 @@
-const API_BASE = "http://localhost:8000";
-
+// API_BASE, money() y makeText() vienen de js/config.js; Carrito de js/carrito.js
 const grid = document.getElementById("product-grid");
 const statusBox = document.getElementById("catalog-status");
 const countLabel = document.getElementById("product-count");
@@ -17,14 +16,7 @@ const filterError = document.getElementById("filter-error");
 const filters = { categoria: "", marca: "", min: "", max: "" };
 let requestId = 0; // evita que una respuesta lenta pise a una más reciente
 
-document.getElementById("year").textContent = new Date().getFullYear();
 document.getElementById("dialog-close").addEventListener("click", () => dialog.close());
-
-function money(value) {
-  const amount = Number(value);
-  if (!Number.isFinite(amount)) return "Precio no disponible";
-  return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(amount);
-}
 
 function showStatus(message, type = "loading") {
   statusBox.className = `status ${type === "error" ? "error" : ""}`;
@@ -46,11 +38,25 @@ function showStatus(message, type = "loading") {
   statusBox.hidden = false;
 }
 
-function makeText(tag, className, value) {
-  const element = document.createElement(tag);
-  if (className) element.className = className;
-  element.textContent = value ?? "";
-  return element;
+// Botón "Agregar al carrito"; se desactiva si el producto está agotado
+function addToCartButton(product) {
+  const available = Number(product.stock) > 0;
+  const label = available ? "🛒 Agregar al carrito" : "Agotado";
+  const button = makeText("button", "add-button", label);
+  button.type = "button";
+  button.disabled = !available;
+  let timer;
+  button.addEventListener("click", () => {
+    const added = Carrito.agregar(product);
+    button.textContent = added ? "✓ Agregado" : "Máximo disponible";
+    button.classList.toggle("is-added", added);
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      button.textContent = label;
+      button.classList.remove("is-added");
+    }, 1400);
+  });
+  return button;
 }
 
 function openDetails(product) {
@@ -68,6 +74,7 @@ function openDetails(product) {
   dialogContent.append(makeText("p", "price", money(product.precio)));
   dialogContent.append(makeText("p", "unit", `Unidad: ${product.unidad || "No especificada"}`));
   dialogContent.append(makeText("p", "stock", Number(product.stock) > 0 ? `Disponible · ${product.stock} en existencia` : "Agotado"));
+  dialogContent.append(addToCartButton(product));
   dialog.showModal();
 }
 
@@ -111,7 +118,7 @@ function productCard(product) {
   const button = makeText("button", "detail-button", "Ver detalles");
   button.type = "button";
   button.addEventListener("click", () => openDetails(product));
-  info.append(button);
+  info.append(addToCartButton(product), button);
 
   card.append(imageWrap, info);
   return card;
