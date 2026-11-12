@@ -105,23 +105,63 @@ def crear(datos, cliente_sesion=None):
         productos = _bloquear_productos(cursor, [item.id_producto for item in datos.items])
         lineas = _armar_lineas(datos.items, productos)
 
-        zona = _zona_de_entrega(cursor, datos.direccion.codigo_postal)
+        if cliente_sesion:
+            id_cliente = cliente_sesion["id_cliente"]
+
+            if datos.id_direccion is not None:
+                cursor.execute(
+                    """SELECT id_direccion, calle, colonia, ciudad, codigo_postal, referencias
+                       FROM direcciones
+                       WHERE id_direccion = %s AND id_cliente = %s""",
+                    (datos.id_direccion, id_cliente),
+                )
+                direccion = cursor.fetchone()
+                if direccion is None:
+                    raise PedidoInvalido("La dirección seleccionada no existe.")
+                id_direccion = direccion["id_direccion"]
+            else:
+                d = datos.direccion
+                cursor.execute(
+                    """INSERT INTO direcciones
+                       (id_cliente, calle, colonia, ciudad, codigo_postal, referencias)
+                       VALUES (%s, %s, %s, %s, %s, %s)""",
+                    (id_cliente, d.calle, d.colonia, d.ciudad, d.codigo_postal, d.referencias),
+                )
+                id_direccion = cursor.lastrowid
+                direccion = {
+                    "id_direccion": id_direccion,
+                    "calle": d.calle,
+                    "colonia": d.colonia,
+                    "ciudad": d.ciudad,
+                    "codigo_postal": d.codigo_postal,
+                    "referencias": d.referencias,
+                }
+        else:
+            # Los invitados no pueden usar direcciones guardadas.
+            if datos.id_direccion is not None:
+                raise PedidoInvalido("Inicia sesión para usar una dirección guardada.")
+            id_cliente = _obtener_o_crear_cliente(cursor, datos.cliente)
+            d = datos.direccion
+            cursor.execute(
+                """INSERT INTO direcciones
+                   (id_cliente, calle, colonia, ciudad, codigo_postal, referencias)
+                   VALUES (%s, %s, %s, %s, %s, %s)""",
+                (id_cliente, d.calle, d.colonia, d.ciudad, d.codigo_postal, d.referencias),
+            )
+            id_direccion = cursor.lastrowid
+            direccion = {
+                "id_direccion": id_direccion,
+                "calle": d.calle,
+                "colonia": d.colonia,
+                "ciudad": d.ciudad,
+                "codigo_postal": d.codigo_postal,
+                "referencias": d.referencias,
+            }
+
+        zona = _zona_de_entrega(cursor, direccion["codigo_postal"])
         subtotal = sum((linea["subtotal"] for linea in lineas), Decimal("0.00"))
         costo_envio = calcular_envio(subtotal, zona["costo_envio"])
         total = subtotal + costo_envio
-
-        if cliente_sesion:
-            id_cliente = cliente_sesion["id_cliente"]
-        else:
-            id_cliente = _obtener_o_crear_cliente(cursor, datos.cliente)
-
-        d = datos.direccion
-        cursor.execute(
-            """INSERT INTO direcciones (id_cliente, calle, colonia, ciudad, codigo_postal, referencias)
-               VALUES (%s, %s, %s, %s, %s, %s)""",
-            (id_cliente, d.calle, d.colonia, d.ciudad, d.codigo_postal, d.referencias),
-        )
-        id_direccion = cursor.lastrowid
 
         fecha = datetime.now().replace(microsecond=0)
         minutos = zona["tiempo_estimado_min"]
@@ -161,7 +201,13 @@ def crear(datos, cliente_sesion=None):
             # Con sesión, el pedido es de la cuenta aunque se escriba otro correo
             "correo": cliente_sesion["correo"] if cliente_sesion else datos.cliente.correo,
         },
-        "direccion": d.model_dump(),
+        "direccion": {
+            "calle": direccion["calle"],
+            "colonia": direccion["colonia"],
+            "ciudad": direccion["ciudad"],
+            "codigo_postal": direccion["codigo_postal"],
+            "referencias": direccion["referencias"],
+        },
         "items": lineas,
         "subtotal": subtotal,
         "costo_envio": costo_envio,
