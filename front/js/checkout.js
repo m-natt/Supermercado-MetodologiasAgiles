@@ -371,9 +371,12 @@ async function saveEditedAddress() {
     if (!response.ok || result?.ok !== true) {
       throw new Error(result?.error || "No pudimos actualizar la dirección.");
     }
+    // Si la dirección ya tenía pedidos, el backend la guarda como nueva
+    // (con otro id): se reemplaza la anterior por la nueva en la lista.
     const updated = result.data;
+    const editedId = Number(editingAddressId);
     savedAddresses = savedAddresses.map(a =>
-      Number(a.id_direccion) === Number(updated.id_direccion) ? updated : a
+      Number(a.id_direccion) === editedId ? updated : a
     );
     selectedAddressId = Number(updated.id_direccion);
     editingAddressId = null;

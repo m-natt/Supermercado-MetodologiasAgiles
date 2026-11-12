@@ -32,10 +32,11 @@ def actualizar(
     id_cliente = _cliente_id(cliente)
     if direccion_service.obtener(id_cliente, id_direccion) is None:
         raise HTTPException(status_code=404, detail="La dirección no existe.")
-    direccion_service.actualizar(id_cliente, id_direccion, datos)
+    # Si la dirección ya tenía pedidos, se guarda como una nueva con otro id
+    id_resultante = direccion_service.actualizar(id_cliente, id_direccion, datos)
     return {
         "ok": True,
-        "data": direccion_service.obtener(id_cliente, id_direccion),
+        "data": direccion_service.obtener(id_cliente, id_resultante),
     }
 
 

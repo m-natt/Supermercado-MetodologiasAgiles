@@ -112,7 +112,7 @@ def crear(datos, cliente_sesion=None):
                 cursor.execute(
                     """SELECT id_direccion, calle, colonia, ciudad, codigo_postal, referencias
                        FROM direcciones
-                       WHERE id_direccion = %s AND id_cliente = %s""",
+                       WHERE id_direccion = %s AND id_cliente = %s AND activa = 1""",
                     (datos.id_direccion, id_cliente),
                 )
                 direccion = cursor.fetchone()

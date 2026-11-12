@@ -40,6 +40,8 @@ CREATE TABLE direcciones (
   ciudad VARCHAR(100),
   codigo_postal VARCHAR(10),
   referencias VARCHAR(255),
+  -- 0 = el cliente la borró, pero se conserva porque la usan pedidos anteriores
+  activa TINYINT(1) NOT NULL DEFAULT 1,
   FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
 
