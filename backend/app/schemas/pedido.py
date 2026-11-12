@@ -1,6 +1,6 @@
 from typing import Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 # Máximo de unidades de un mismo producto por pedido
 MAX_CANTIDAD = 999
@@ -33,7 +33,10 @@ class DireccionPedido(Entrada):
 
 class PedidoEntrada(Entrada):
     cliente: ClientePedido
-    direccion: DireccionPedido
+    # Si se manda id_direccion se usa una dirección guardada del cliente.
+    # Si no se manda, direccion contiene una dirección nueva que se guardará.
+    id_direccion: Optional[int] = Field(default=None, gt=0)
+    direccion: Optional[DireccionPedido] = None
     # Se paga al recibir (efectivo o tarjeta en terminal) o por transferencia.
     # Nunca se reciben datos de tarjeta en la página.
     metodo_pago: Literal["efectivo", "tarjeta", "transferencia"]
@@ -46,3 +49,9 @@ class PedidoEntrada(Entrada):
         if len(ids) != len(set(ids)):
             raise ValueError("Hay productos repetidos; une las cantidades en una sola línea.")
         return items
+
+    @model_validator(mode="after")
+    def validar_direccion(self):
+        if self.id_direccion is None and self.direccion is None:
+            raise ValueError("Debes seleccionar una dirección o capturar una nueva.")
+        return self
