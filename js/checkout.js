@@ -24,6 +24,11 @@ let sending = false;
 // o { cubierto, ciudad, costo_envio, tiempo_estimado_min }
 let zona = null;
 
+// Direcciones guardadas del cliente autenticado (E6-18)
+let savedAddresses = [];
+let selectedAddressId = null;
+let editingAddressId = null;
+
 // Devuelve el costo de envío, o null si todavía no se conoce
 function shippingFor(subtotal) {
   if (subtotal >= ENVIO_GRATIS_DESDE) return 0;
@@ -154,24 +159,270 @@ function buildPayload() {
   const data = new FormData(form);
   const text = name => String(data.get(name) ?? "").trim();
   const optional = name => text(name) || null;
-  return {
+
+  const payload = {
     cliente: {
       nombre: text("nombre"),
       apellidos: optional("apellidos"),
       correo: text("correo"),
       telefono: text("telefono"),
     },
-    direccion: {
+    metodo_pago: text("metodo_pago"),
+    items: Carrito.leer().map(i => ({ id_producto: i.id_producto, cantidad: i.cantidad })),
+  };
+
+  if (selectedAddressId) {
+    payload.id_direccion = selectedAddressId;
+  } else {
+    payload.direccion = {
       calle: text("calle"),
       colonia: text("colonia"),
       ciudad: text("ciudad"),
       codigo_postal: text("codigo_postal"),
       referencias: optional("referencias"),
-    },
-    metodo_pago: text("metodo_pago"),
-    items: Carrito.leer().map(i => ({ id_producto: i.id_producto, cantidad: i.cantidad })),
-  };
+    };
+  }
+
+  return payload;
 }
+
+const savedPanel = document.getElementById("saved-addresses-panel");
+const savedList = document.getElementById("saved-addresses-list");
+const savedError = document.getElementById("saved-addresses-error");
+const newAddressButton = document.getElementById("new-address-button");
+const saveAddressButton = document.getElementById("save-address-button");
+const cancelEditAddressButton = document.getElementById("cancel-edit-address-button");
+const addressMode = document.getElementById("address-mode");
+
+function addressText(address) {
+  return [
+    address.calle,
+    address.colonia,
+    address.ciudad,
+    `C.P. ${address.codigo_postal}`,
+  ].filter(Boolean).join(", ");
+}
+
+function showSavedError(message = "") {
+  savedError.textContent = message;
+  savedError.hidden = !message;
+}
+
+function setAddressFieldsReadOnly(value) {
+  ["calle", "colonia", "ciudad", "codigo_postal", "referencias"]
+    .forEach(name => { form.elements[name].readOnly = value; });
+}
+
+function fillAddressForm(address) {
+  form.elements.calle.value = address?.calle || "";
+  form.elements.colonia.value = address?.colonia || "";
+  form.elements.ciudad.value = address?.ciudad || "";
+  form.elements.codigo_postal.value = address?.codigo_postal || "";
+  form.elements.referencias.value = address?.referencias || "";
+  setAddressFieldsReadOnly(Boolean(address));
+  cpRequest++;
+  if (address?.codigo_postal) checkCoverage();
+}
+
+function setNewAddressMode(clear = true) {
+  selectedAddressId = null;
+  editingAddressId = null;
+  addressMode.textContent = "Nueva dirección";
+  saveAddressButton.hidden = true;
+  cancelEditAddressButton.hidden = true;
+  if (clear) fillAddressForm(null);
+  renderSavedAddresses();
+  render();
+}
+
+function selectSavedAddress(id) {
+  const address = savedAddresses.find(a => Number(a.id_direccion) === Number(id));
+  if (!address) return;
+  selectedAddressId = Number(id);
+  editingAddressId = null;
+  addressMode.textContent = "Dirección guardada";
+  saveAddressButton.hidden = true;
+  cancelEditAddressButton.hidden = true;
+  fillAddressForm(address);
+  renderSavedAddresses();
+  render();
+}
+
+function renderSavedAddresses() {
+  if (!savedPanel || !Sesion.leer()) {
+    if (savedPanel) savedPanel.hidden = true;
+    return;
+  }
+
+  savedPanel.hidden = false;
+  savedList.replaceChildren();
+
+  if (savedAddresses.length === 0) {
+    savedList.append(makeText("p", "saved-addresses-note", "Todavía no tienes direcciones guardadas. Captura una nueva abajo y quedará guardada."));
+    return;
+  }
+
+  savedAddresses.forEach(address => {
+    const card = document.createElement("div");
+    card.className = "saved-address";
+    if (Number(address.id_direccion) === Number(selectedAddressId)) card.classList.add("is-selected");
+
+    const radio = document.createElement("input");
+    radio.type = "radio";
+    radio.name = "saved_address";
+    radio.checked = Number(address.id_direccion) === Number(selectedAddressId);
+    radio.setAttribute("aria-label", `Usar dirección ${address.calle}`);
+    radio.addEventListener("change", () => selectSavedAddress(address.id_direccion));
+
+    const textBox = document.createElement("div");
+    textBox.className = "saved-address__text";
+    textBox.append(
+      makeText("p", "saved-address__title", address.calle),
+      makeText("p", "saved-address__detail", addressText(address))
+    );
+
+    const actions = document.createElement("div");
+    actions.className = "saved-address__actions";
+
+    const useButton = makeText("button", "address-action", "Usar");
+    useButton.type = "button";
+    useButton.addEventListener("click", () => selectSavedAddress(address.id_direccion));
+
+    const editButton = makeText("button", "address-action", "Editar");
+    editButton.type = "button";
+    editButton.addEventListener("click", () => editSavedAddress(address));
+
+    const deleteButton = makeText("button", "address-action address-action--danger", "Eliminar");
+    deleteButton.type = "button";
+    deleteButton.addEventListener("click", () => deleteSavedAddress(address.id_direccion));
+
+    actions.append(useButton, editButton, deleteButton);
+    card.append(radio, textBox, actions);
+    savedList.append(card);
+  });
+}
+
+async function loadSavedAddresses() {
+  if (!Sesion.leer()) {
+    savedAddresses = [];
+    renderSavedAddresses();
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE}/api/clientes/direcciones`, {
+      headers: Sesion.cabeceras(),
+    });
+    const result = await response.json();
+    if (response.status === 401) {
+      Sesion.borrar();
+      applySession();
+      return;
+    }
+    if (!response.ok || result?.ok !== true) {
+      throw new Error(result?.error || "No pudimos cargar tus direcciones.");
+    }
+    savedAddresses = Array.isArray(result.data) ? result.data : [];
+    renderSavedAddresses();
+  } catch (error) {
+    showSavedError(error.message);
+  }
+}
+
+function editSavedAddress(address) {
+  selectedAddressId = Number(address.id_direccion);
+  editingAddressId = Number(address.id_direccion);
+  addressMode.textContent = "Editando dirección guardada";
+  saveAddressButton.hidden = false;
+  cancelEditAddressButton.hidden = false;
+  fillAddressForm(address);
+  setAddressFieldsReadOnly(false);
+  renderSavedAddresses();
+  render();
+  form.elements.calle.focus();
+}
+
+async function saveEditedAddress() {
+  if (!editingAddressId || !form.reportValidity()) return;
+
+  saveAddressButton.disabled = true;
+  showSavedError("");
+  const data = new FormData(form);
+  const payload = {
+    calle: String(data.get("calle") || "").trim(),
+    colonia: String(data.get("colonia") || "").trim(),
+    ciudad: String(data.get("ciudad") || "").trim(),
+    codigo_postal: String(data.get("codigo_postal") || "").trim(),
+    referencias: String(data.get("referencias") || "").trim() || null,
+  };
+
+  try {
+    const response = await fetch(`${API_BASE}/api/clientes/direcciones/${editingAddressId}`, {
+      method: "PUT",
+      headers: Sesion.cabeceras({ "Content-Type": "application/json" }),
+      body: JSON.stringify(payload),
+    });
+    const result = await response.json();
+    if (response.status === 401) {
+      Sesion.borrar();
+      applySession();
+      throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+    }
+    if (!response.ok || result?.ok !== true) {
+      throw new Error(result?.error || "No pudimos actualizar la dirección.");
+    }
+    const updated = result.data;
+    savedAddresses = savedAddresses.map(a =>
+      Number(a.id_direccion) === Number(updated.id_direccion) ? updated : a
+    );
+    selectedAddressId = Number(updated.id_direccion);
+    editingAddressId = null;
+    addressMode.textContent = "Dirección guardada";
+    saveAddressButton.hidden = true;
+    cancelEditAddressButton.hidden = true;
+    fillAddressForm(updated);
+    renderSavedAddresses();
+  } catch (error) {
+    showSavedError(error.message);
+  } finally {
+    saveAddressButton.disabled = false;
+  }
+}
+
+async function deleteSavedAddress(id) {
+  if (!confirm("¿Quieres eliminar esta dirección guardada?")) return;
+  showSavedError("");
+
+  try {
+    const response = await fetch(`${API_BASE}/api/clientes/direcciones/${id}`, {
+      method: "DELETE",
+      headers: Sesion.cabeceras(),
+    });
+    const result = await response.json();
+    if (response.status === 401) {
+      Sesion.borrar();
+      applySession();
+      throw new Error("Tu sesión expiró. Inicia sesión de nuevo.");
+    }
+    if (!response.ok || result?.ok !== true) {
+      throw new Error(result?.error || "No pudimos eliminar la dirección.");
+    }
+
+    savedAddresses = savedAddresses.filter(a => Number(a.id_direccion) !== Number(id));
+    if (Number(selectedAddressId) === Number(id)) setNewAddressMode();
+    else renderSavedAddresses();
+  } catch (error) {
+    showSavedError(error.message);
+  }
+}
+
+newAddressButton?.addEventListener("click", () => setNewAddressMode());
+saveAddressButton?.addEventListener("click", saveEditedAddress);
+cancelEditAddressButton?.addEventListener("click", () => {
+  const selected = savedAddresses.find(a => Number(a.id_direccion) === Number(selectedAddressId));
+  if (selected) selectSavedAddress(selected.id_direccion);
+  else setNewAddressMode();
+});
 
 form.addEventListener("submit", async event => {
   event.preventDefault();
@@ -275,6 +526,10 @@ function applySession() {
     correo.readOnly = false;
     if (sessionApplied) sessionFields.forEach(name => { form.elements[name].value = ""; });
     sessionApplied = false;
+    savedAddresses = [];
+    selectedAddressId = null;
+    editingAddressId = null;
+    renderSavedAddresses();
     const link = makeText("a", "", "Inicia sesión");
     link.href = "usuarios.html";
     sessionNote.append("¿Ya tienes cuenta? ", link, " para usar tus datos guardados.");
@@ -286,6 +541,7 @@ function applySession() {
   });
   correo.readOnly = true;
   sessionApplied = true;
+  loadSavedAddresses();
   const link = makeText("a", "", "¿No eres tú?");
   link.href = "usuarios.html";
   sessionNote.append(`Comprando como ${c.nombre} (${c.correo}). `, link);
