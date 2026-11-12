@@ -223,6 +223,35 @@
 .confirm-address .confirm-help { margin: 6px 0 0; }
 .confirm-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 
+
+
+/* ---------- Direcciones guardadas (E6-18) ---------- */
+.saved-addresses-note { margin: -6px 0 14px; color: var(--muted); font-size: 13px; }
+.saved-addresses-list { display: grid; gap: 10px; }
+.saved-address {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid #e3d9d6;
+  border-radius: 12px;
+  background: #fff;
+}
+.saved-address.is-selected { border-color: var(--green); background: var(--green-soft); }
+.saved-address input { width: 18px; height: 18px; margin: 0; accent-color: var(--green); }
+.saved-address__text { min-width: 0; }
+.saved-address__title { margin: 0 0 3px; font-weight: 800; }
+.saved-address__detail { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.saved-address__actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.address-action {
+  padding: 6px 8px; border: 0; background: none; color: var(--green);
+  font: inherit; font-size: 12px; font-weight: 750; text-decoration: underline;
+}
+.address-action--danger { color: #a12a1f; }
+.address-mode { color: var(--muted); font-size: 12px; font-weight: 700; }
+.address-form-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
 /* ---------- Responsivo ---------- */
 @media (max-width: 900px) {
   .checkout-layout { grid-template-columns: 1fr; }
