@@ -461,7 +461,9 @@ form.addEventListener("submit", async event => {
       sessionStorage.setItem(ULTIMO_PEDIDO_KEY, JSON.stringify(pedido));
     } catch { /* la confirmación mostrará solo el número de pedido */ }
     Carrito.vaciar();
-    location.href = `confirmacion.html?pedido=${encodeURIComponent(pedido.id_pedido)}`;
+    // Con tarjeta en línea, primero se paga (simulado) y luego se confirma
+    const siguiente = pedido.metodo_pago === "tarjeta_linea" ? "pago.html" : "confirmacion.html";
+    location.href = `${siguiente}?pedido=${encodeURIComponent(pedido.id_pedido)}`;
   } catch (error) {
     setSending(false);
     showError(error instanceof TypeError

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supermercado Bonito :3 | Mis tarjetas</title>
+  <link rel="stylesheet" href="css/styles.css?v=20261113">
+  <link rel="stylesheet" href="css/diseno.css?v=20261113">
+  <link rel="stylesheet" href="css/checkout.css?v=20261113">
+  <script src="js/config.js?v=20261113" defer></script>
+  <script src="js/carrito.js?v=20261113" defer></script>
+  <script src="js/sesion.js?v=20261113" defer></script>
+  <script src="js/tarjetas.js?v=20261113" defer></script>
+  <script src="js/mis-tarjetas.js?v=20261113" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario"><span class="usuario__icono">👤</span> Mi cuenta</a>
+      <a href="checkout.html" class="carrito"><span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span></a>
+    </div>
+  </header>
+
+  <main class="container checkout-page">
+    <a href="usuarios.html" class="back-link">← Mi cuenta</a>
+    <h1 class="page-title">Mis tarjetas</h1>
+    <p class="demo-banner">🧪 Entorno de pruebas: no se hacen cobros reales. Usa solo tarjetas de prueba.</p>
+    <p class="note" id="owner"></p>
+
+    <section class="panel" aria-labelledby="saved-title">
+      <h2 id="saved-title">Tarjetas guardadas</h2>
+      <p class="note">Al pagar un pedido, tu tarjeta predeterminada se selecciona automáticamente.
+        Solo guardamos la marca, los últimos 4 dígitos, el titular y el vencimiento; nunca el número completo ni el CVV.</p>
+      <div id="cards" class="tcards"></div>
+      <p id="empty" class="note" hidden>Aún no tienes tarjetas guardadas.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="add-title">
+      <h2 id="add-title">Agregar tarjeta</h2>
+      <form id="form" autocomplete="off" novalidate>
+        <div class="field-grid">
+          <label class="field field--wide"><span>Nombre del titular *</span>
+            <input id="name" maxlength="60" placeholder="Como aparece en la tarjeta"></label>
+          <label class="field field--wide"><span>Número de tarjeta de prueba *</span>
+            <input id="number" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242"></label>
+          <label class="field"><span>Vencimiento *</span>
+            <input id="expiry" inputmode="numeric" maxlength="5" placeholder="MM/AA"></label>
+          <label class="field field--check">
+            <input type="checkbox" id="def"> Usar como predeterminada
+          </label>
+        </div>
+        <p id="error" class="form-error" role="alert" hidden></p>
+        <p id="okmsg" class="ok-msg" role="status" hidden></p>
+        <button type="submit" class="primary-button">Guardar tarjeta</button>
+      </form>
+      <details class="test-cards">
+        <summary>Tarjetas de prueba</summary>
+        <ul>
+          <li><code>4242 4242 4242 4242</code> — VISA, pago aprobado</li>
+          <li><code>5555 5555 5555 4444</code> — MASTERCARD, pago aprobado</li>
+          <li><code>4000 0000 0000 0002</code> — VISA, pago rechazado</li>
+        </ul>
+        <p>Usa cualquier vencimiento futuro y cualquier CVV de 3 dígitos.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="pie">© <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados</footer>
+</body>
+</html>

@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Revisa tu carrito y confirma tu pedido">
   <title>Supermercado Bonito :3 | Finalizar compra</title>
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/diseno.css">
-  <link rel="stylesheet" href="css/checkout.css">
-  <script src="js/config.js" defer></script>
-  <script src="js/carrito.js" defer></script>
-  <script src="js/sesion.js" defer></script>
-  <script src="js/checkout.js" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=20261113">
+  <link rel="stylesheet" href="css/diseno.css?v=20261113">
+  <link rel="stylesheet" href="css/checkout.css?v=20261113">
+  <script src="js/config.js?v=20261113" defer></script>
+  <script src="js/carrito.js?v=20261113" defer></script>
+  <script src="js/sesion.js?v=20261113" defer></script>
+  <script src="js/checkout.js?v=20261113" defer></script>
 </head>
 <body>
 
@@ -148,6 +148,14 @@
               <span>
                 <strong>Tarjeta al recibir</strong>
                 <small>El repartidor lleva terminal. No pedimos datos de tarjeta aquí.</small>
+              </span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="metodo_pago" value="tarjeta_linea">
+              <span class="payment-option__icon" aria-hidden="true">🧪</span>
+              <span>
+                <strong>Tarjeta en línea (simulación)</strong>
+                <small>Pagas ahora con una tarjeta de prueba. No se hace ningún cobro real.</small>
               </span>
             </label>
             <label class="payment-option">

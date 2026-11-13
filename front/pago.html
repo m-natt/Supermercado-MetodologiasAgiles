@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supermercado Bonito :3 | Pago con tarjeta</title>
+  <link rel="stylesheet" href="css/styles.css?v=20261113">
+  <link rel="stylesheet" href="css/diseno.css?v=20261113">
+  <link rel="stylesheet" href="css/checkout.css?v=20261113">
+  <script src="js/config.js?v=20261113" defer></script>
+  <script src="js/carrito.js?v=20261113" defer></script>
+  <script src="js/sesion.js?v=20261113" defer></script>
+  <script src="js/tarjetas.js?v=20261113" defer></script>
+  <script src="js/pago.js?v=20261113" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario"><span class="usuario__icono">👤</span> Mi cuenta</a>
+      <a href="checkout.html" class="carrito"><span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span></a>
+    </div>
+  </header>
+
+  <main class="container checkout-page">
+    <ol class="steps" aria-label="Pasos de la compra">
+      <li class="step is-done"><span>✓</span> Carrito y datos</li>
+      <li class="step is-current" aria-current="step"><span>2</span> Pago</li>
+      <li class="step"><span>3</span> Confirmación</li>
+    </ol>
+
+    <h1 class="page-title">Pago con tarjeta</h1>
+    <p class="demo-banner">🧪 Pago simulado: no se hace ningún cobro real. Usa solo tarjetas de prueba.</p>
+
+    <!-- Si se abre sin un pedido por pagar -->
+    <section id="pay-missing" class="panel empty-cart" hidden>
+      <span class="empty-cart__icon" aria-hidden="true">💳</span>
+      <h2>No hay un pedido por pagar</h2>
+      <p>Elige "Tarjeta en línea" al confirmar tu pedido en el carrito.</p>
+      <a href="checkout.html" class="primary-button">Ir al carrito</a>
+    </section>
+
+    <div id="pay-layout" class="checkout-layout" hidden>
+      <div class="checkout-main">
+        <section id="saved-section" class="panel" aria-labelledby="saved-pay-title" hidden>
+          <div class="panel__head">
+            <h2 id="saved-pay-title">Tus tarjetas</h2>
+            <a href="tarjetas.html" class="back-link">Administrar</a>
+          </div>
+          <div id="saved-options" class="payment-options"></div>
+        </section>
+
+        <form id="pay-form" class="panel" autocomplete="off" novalidate aria-labelledby="card-title">
+          <h2 id="card-title">Datos de la tarjeta</h2>
+          <div id="card-preview"></div>
+
+          <div id="new-card-fields" class="field-grid">
+            <label class="field field--wide"><span>Nombre del titular *</span>
+              <input id="name" maxlength="60" placeholder="Como aparece en la tarjeta"></label>
+            <label class="field field--wide"><span>Número de tarjeta de prueba *</span>
+              <input id="number" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242"></label>
+            <label class="field"><span>Vencimiento *</span>
+              <input id="expiry" inputmode="numeric" maxlength="5" placeholder="MM/AA"></label>
+            <label class="field field--check">
+              <input type="checkbox" id="save-card"> Guardar tarjeta para la próxima
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label class="field"><span>CVV *</span>
+              <input id="cvv" type="password" inputmode="numeric" maxlength="4" placeholder="123"></label>
+          </div>
+          <p class="note">El CVV se pide en cada pago y nunca se guarda ni se envía.</p>
+
+          <details class="test-cards">
+            <summary>Tarjetas de prueba</summary>
+            <ul>
+              <li><code>4242 4242 4242 4242</code> — pago aprobado</li>
+              <li><code>5555 5555 5555 4444</code> — pago aprobado</li>
+              <li><code>4000 0000 0000 0002</code> — pago rechazado</li>
+            </ul>
+          </details>
+        </form>
+      </div>
+
+      <aside class="panel summary" aria-labelledby="pay-summary-title">
+        <h2 id="pay-summary-title">Tu pedido</h2>
+        <dl class="summary__rows">
+          <div><dt>Pedido</dt><dd id="pay-order"></dd></div>
+          <div class="summary__total"><dt>Total a pagar</dt><dd id="pay-total"></dd></div>
+        </dl>
+        <p id="pay-error" class="form-error" role="alert" hidden></p>
+        <button type="submit" form="pay-form" id="pay-button" class="primary-button primary-button--block">Pagar</button>
+        <a id="pay-later" class="secondary-button primary-button--block pay-later" href="confirmacion.html">Pagar después</a>
+        <p class="summary__note">Tu pedido ya está registrado; si el pago falla puedes intentarlo de nuevo.</p>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="pie">© <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados</footer>
+</body>
+</html>

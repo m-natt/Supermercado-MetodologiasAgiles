@@ -16,7 +16,28 @@ const METODOS = {
     nombre: "🏦 Transferencia",
     ayuda: "Te contactaremos al teléfono o correo que registraste con los datos para transferir.",
   },
+  tarjeta_linea: {
+    nombre: "🧪 Tarjeta en línea (simulación)",
+    ayuda: "Pago de prueba: no se hizo ningún cobro real.",
+  },
 };
+
+// Estado del pago con tarjeta en línea (lo guarda pago.js en el pedido)
+function showCardPayment(order) {
+  if (order.metodo_pago !== "tarjeta_linea") return;
+  const box = makeText("p", "pay-status", "");
+  if (order.pago?.estado === "aprobado") {
+    box.classList.add("pay-status--ok");
+    box.textContent = `✓ Pagado con ${order.pago.tarjeta} · Folio ${order.pago.folio}`;
+  } else {
+    box.classList.add("pay-status--pending");
+    box.append("⏳ Pago pendiente. ");
+    const link = makeText("a", "", "Pagar ahora");
+    link.href = `pago.html?pedido=${encodeURIComponent(order.id_pedido)}`;
+    box.append(link);
+  }
+  $("confirm-method-help").after(box);
+}
 
 const $ = id => document.getElementById(id);
 
@@ -104,6 +125,7 @@ function showOrder(order) {
 
   $("confirm-method").textContent = metodo.nombre;
   $("confirm-method-help").textContent = metodo.ayuda;
+  showCardPayment(order);
   $("confirm-contact").textContent =
     [[cliente.nombre, cliente.apellidos].filter(Boolean).join(" "), cliente.correo].filter(Boolean).join(" · ");
 

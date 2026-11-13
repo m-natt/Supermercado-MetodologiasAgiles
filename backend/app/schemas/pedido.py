@@ -37,9 +37,9 @@ class PedidoEntrada(Entrada):
     # Si no se manda, direccion contiene una dirección nueva que se guardará.
     id_direccion: Optional[int] = Field(default=None, gt=0)
     direccion: Optional[DireccionPedido] = None
-    # Se paga al recibir (efectivo o tarjeta en terminal) o por transferencia.
-    # Nunca se reciben datos de tarjeta en la página.
-    metodo_pago: Literal["efectivo", "tarjeta", "transferencia"]
+    # efectivo / tarjeta (terminal al recibir) / transferencia /
+    # tarjeta_linea (pago en línea SIMULADO, se paga después en pago.html)
+    metodo_pago: Literal["efectivo", "tarjeta", "transferencia", "tarjeta_linea"]
     items: list[ItemPedido] = Field(min_length=1, max_length=100)
 
     @field_validator("items")
@@ -55,3 +55,14 @@ class PedidoEntrada(Entrada):
         if self.id_direccion is None and self.direccion is None:
             raise ValueError("Debes seleccionar una dirección o capturar una nueva.")
         return self
+
+
+class PagoTarjetaEntrada(Entrada):
+    """Pago con tarjeta SIMULADO.
+
+    Solo se reciben los últimos 4 dígitos y el vencimiento: el número completo
+    y el CVV nunca salen del navegador ni se guardan.
+    """
+    ultimos4: str = Field(pattern=r"^\d{4}$")
+    vence: str = Field(pattern=r"^(0[1-9]|1[0-2])/\d{2}$")
+    marca: str = Field(default="TARJETA", max_length=20)

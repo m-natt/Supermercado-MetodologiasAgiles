@@ -284,3 +284,41 @@
   body { background: #fff; }
   .panel { border-color: #ccc; break-inside: avoid; }
 }
+
+/* ---------- Tarjetas y pago con tarjeta (simulado) ---------- */
+.demo-banner { margin: -10px 0 18px; padding: 10px 14px; border-radius: 10px; background: #fff7e0; color: #7a5200; font-size: 14px; font-weight: 700; }
+.note { margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.ok-msg { margin: 10px 0 0; color: #166534; font-size: 14px; font-weight: 700; }
+.ok-msg[hidden] { display: none; }
+.field--check { flex-direction: row; align-items: center; gap: 8px; align-self: end; padding-bottom: 12px; }
+.field--check input { width: auto; accent-color: var(--green); }
+#pay-form .field-grid + .field-grid { margin-top: 14px; }
+#pay-form .note { margin-top: 10px; }
+#new-card-fields[hidden] { display: none; }
+#pay-layout[hidden] { display: none; }
+#card-preview { max-width: 340px; margin-bottom: 18px; }
+.pay-later { margin-top: 10px; }
+
+.tcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.tcard {
+  display: flex; flex-direction: column; justify-content: space-between; gap: 14px;
+  min-height: 160px; padding: 18px; border-radius: 14px; color: #fff;
+  background: linear-gradient(125deg, #7d1c1c, #ae2929);
+  box-shadow: 0 10px 24px #7d1c1c33;
+}
+.tcard__top, .tcard__bot { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tcard__brand { font-weight: 800; letter-spacing: 1px; }
+.tcard__badge { padding: 2px 9px; border-radius: 99px; background: #fff; color: var(--rojo); font-size: 11px; font-weight: 800; }
+.tcard__num { font-size: 18px; letter-spacing: 2px; font-variant-numeric: tabular-nums; }
+.tcard small { display: block; opacity: .8; font-size: 10px; }
+.tcard__bot span { font-size: 13px; overflow-wrap: anywhere; }
+.tcard__acts { display: flex; gap: 8px; margin-top: 10px; }
+.tcard__acts .secondary-button { flex: 1; padding: 8px 10px; font-size: 13px; }
+
+.test-cards { margin-top: 16px; font-size: 13px; color: var(--muted); }
+.test-cards summary { cursor: pointer; color: var(--green); font-weight: 750; }
+.test-cards ul { margin: 8px 0; padding-left: 18px; line-height: 1.8; }
+.test-cards code { color: var(--ink); font-weight: 700; }
+.pay-status { margin: 0 0 16px; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 700; }
+.pay-status--ok { background: #dcfce7; color: #166534; }
+.pay-status--pending { background: #fff7e0; color: #7a5200; }

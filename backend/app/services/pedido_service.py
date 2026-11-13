@@ -213,3 +213,60 @@ def crear(datos, cliente_sesion=None):
         "costo_envio": costo_envio,
         "total": total,
     }
+
+
+# ---------- Pago con tarjeta en línea (SIMULADO) ----------
+# No hay banco ni pasarela: el resultado depende de la tarjeta de prueba.
+# La que termina en 0002 (4000 0000 0000 0002) siempre se rechaza.
+TERMINACION_RECHAZO_SIMULADO = "0002"
+
+
+class PedidoNoEncontrado(Exception):
+    pass
+
+
+def _tarjeta_vencida(vence):
+    mes, anio = (int(x) for x in vence.split("/"))
+    hoy = datetime.now()
+    return (2000 + anio, mes) < (hoy.year, hoy.month)
+
+
+def pagar_con_tarjeta(id_pedido, datos, cliente_sesion=None):
+    """Registra el resultado de un pago simulado en la tabla pagos."""
+    with transaccion() as cursor:
+        cursor.execute(
+            """SELECT p.id_cliente, c.contrasena, pa.id_pago, pa.metodo, pa.estado, pa.monto
+               FROM pedidos p
+               JOIN clientes c ON c.id_cliente = p.id_cliente
+               JOIN pagos pa ON pa.id_pedido = p.id_pedido
+               WHERE p.id_pedido = %s
+               FOR UPDATE""",
+            (id_pedido,),
+        )
+        fila = cursor.fetchone()
+        if fila is None:
+            raise PedidoNoEncontrado()
+        # El pedido de una cuenta registrada solo lo puede pagar su dueño
+        es_de_cuenta = fila["contrasena"] != CONTRASENA_INVITADO
+        if es_de_cuenta and (not cliente_sesion or cliente_sesion["id_cliente"] != fila["id_cliente"]):
+            raise PedidoNoEncontrado()
+        if fila["metodo"] != "tarjeta_linea":
+            raise PedidoInvalido("Este pedido no se paga con tarjeta en línea.")
+        if fila["estado"] == "aprobado":
+            raise PedidoInvalido("Este pedido ya está pagado.")
+        if _tarjeta_vencida(datos.vence):
+            raise PedidoInvalido("La tarjeta está vencida.")
+
+        estado = "rechazado" if datos.ultimos4 == TERMINACION_RECHAZO_SIMULADO else "aprobado"
+        cursor.execute(
+            "UPDATE pagos SET estado = %s, fecha = %s WHERE id_pago = %s",
+            (estado, datetime.now().replace(microsecond=0), fila["id_pago"]),
+        )
+
+    return {
+        "id_pedido": id_pedido,
+        "estado": estado,
+        "monto": fila["monto"],
+        "folio": f"SIM-{fila['id_pago']:06d}",
+        "tarjeta": f"{datos.marca} •••• {datos.ultimos4}",
+    }
