@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supermercado Bonito :3 | Mis tarjetas</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/diseno.css">
+  <link rel="stylesheet" href="css/checkout.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/carrito.js" defer></script>
+  <script src="js/sesion.js" defer></script>
+  <style>
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:6px}
+    .tcard{border-radius:14px;padding:18px;color:#fff;background:linear-gradient(125deg,#7d1c1c,#ae2929);min-height:150px;display:flex;flex-direction:column;justify-content:space-between}
+    .tcard__top,.tcard__bot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .tcard__num{font-size:18px;letter-spacing:2px}
+    .tcard small{opacity:.8;font-size:10px;display:block}
+    .tcard__brand{font-weight:800;letter-spacing:1px}
+    .badge{background:#fff;color:var(--rojo);font-size:11px;font-weight:800;border-radius:99px;padding:2px 9px}
+    .tcard__acts{display:flex;gap:8px;margin-top:10px}
+    .tcard__acts button{flex:1;padding:7px;border-radius:8px;border:1px solid #fff8;background:#0002;color:#fff;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+    .tcard__acts button:hover{background:#0004}
+    .note{font-size:13px;color:var(--muted);margin:0 0 14px}
+    .ok{color:#166534;font-weight:700;font-size:14px;margin:10px 0 0}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario"><span class="usuario__icono">👤</span> Mi cuenta</a>
+      <a href="checkout.html" class="carrito"><span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span></a>
+    </div>
+  </header>
+
+  <main class="container checkout-page">
+    <a href="usuarios.html" class="back-link">← Mi cuenta</a>
+    <h1 class="page-title">Mis tarjetas</h1>
+    <p class="note" id="owner"></p>
+
+    <section class="panel" aria-labelledby="saved-title">
+      <h2 id="saved-title">Tarjetas guardadas</h2>
+      <p class="note">En el pago, tu tarjeta predeterminada se rellena automáticamente. El CVV nunca se guarda: se pide en cada compra.</p>
+      <div id="cards" class="cards"></div>
+      <p id="empty" class="note" hidden>Aún no tienes tarjetas guardadas.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="add-title">
+      <h2 id="add-title">Agregar tarjeta</h2>
+      <form id="form" autocomplete="off" novalidate>
+        <div class="field-grid">
+          <label class="field field--wide"><span>Nombre del titular *</span>
+            <input id="name" maxlength="60" placeholder="Como aparece en la tarjeta"></label>
+          <label class="field field--wide"><span>Número de tarjeta de prueba *</span>
+            <input id="number" inputmode="numeric" maxlength="19" placeholder="4242 4242 4242 4242"></label>
+          <label class="field"><span>Vencimiento *</span>
+            <input id="expiry" inputmode="numeric" maxlength="5" placeholder="MM/AA"></label>
+          <label class="field" style="justify-content:end"><span>&nbsp;</span>
+            <span style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="def" style="width:auto"> Usar como predeterminada</span></label>
+        </div>
+        <p id="error" class="form-error" role="alert" hidden></p>
+        <p id="okmsg" class="ok" role="status" hidden></p>
+        <button type="submit" class="primary-button" style="margin-top:14px">Guardar tarjeta</button>
+      </form>
+      <p class="note" style="margin-top:14px">Entorno de pruebas: las tarjetas se guardan solo en este navegador. No uses tarjetas reales.</p>
+    </section>
+  </main>
+
+  <footer class="pie">© <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados</footer>
+
+  <script>
+  // Almacén de tarjetas: una lista por cuenta (o "invitado"). Mismo código que pago.html.
+  const Tarjetas = (() => {
+    const clave = () => "supermercado_tarjetas_" + (Sesion.leer()?.cliente?.correo || "invitado");
+    const leer = () => { try { const d = JSON.parse(localStorage.getItem(clave()) || "[]"); return Array.isArray(d) ? d : []; } catch { return []; } };
+    const guardar = l => { try { localStorage.setItem(clave(), JSON.stringify(l)); return true; } catch { return false; } };
+    function agregar(t, predeterminada) {
+      const l = leer();
+      if (l.some(x => x.numero === t.numero)) return "duplicada";
+      if (predeterminada || l.length === 0) l.forEach(x => x.predeterminada = false);
+      l.push({ id: Date.now().toString(36), ...t, predeterminada: predeterminada || l.length === 0 });
+      return guardar(l) ? "ok" : "error";
+    }
+    const quitar = id => { let l = leer().filter(x => x.id !== id); if (l.length && !l.some(x => x.predeterminada)) l[0].predeterminada = true; guardar(l); };
+    const hacerPredeterminada = id => guardar(leer().map(x => ({ ...x, predeterminada: x.id === id })));
+    return { leer, agregar, quitar, hacerPredeterminada };
+  })();
+
+  const $ = id => document.getElementById(id);
+  const marca = n => /^4/.test(n) ? "VISA" : /^(5[1-5]|2[2-7])/.test(n) ? "MASTERCARD" : "TARJETA";
+  const luhn = d => { let s = 0, dbl = false; for (let i = d.length - 1; i >= 0; i--) { let x = +d[i]; if (dbl) { x *= 2; if (x > 9) x -= 9; } s += x; dbl = !dbl; } return s % 10 === 0; };
+  const vigente = v => { if (!/^\d{2}\/\d{2}$/.test(v)) return false; const [m, y] = v.split("/").map(Number), n = new Date(); return m >= 1 && m <= 12 && (y > n.getFullYear() % 100 || (y === n.getFullYear() % 100 && m >= n.getMonth() + 1)); };
+
+  function pintar() {
+    const sesion = Sesion.leer();
+    $("owner").textContent = sesion ? `Tarjetas de ${sesion.cliente.nombre} (${sesion.cliente.correo}).` : "No has iniciado sesión: estas tarjetas quedan como invitado en este navegador.";
+    const lista = Tarjetas.leer();
+    $("empty").hidden = lista.length > 0;
+    $("cards").replaceChildren(...lista.map(t => {
+      const box = document.createElement("div");
+      const c = document.createElement("div"); c.className = "tcard";
+      const top = document.createElement("div"); top.className = "tcard__top";
+      top.append(makeText("span", "tcard__brand", marca(t.numero)));
+      if (t.predeterminada) top.append(makeText("span", "badge", "Predeterminada"));
+      const num = makeText("div", "tcard__num", `•••• •••• •••• ${t.numero.slice(-4)}`);
+      const bot = document.createElement("div"); bot.className = "tcard__bot";
+      const a = document.createElement("div"); a.append(makeText("small", "", "TITULAR"), makeText("span", "", t.titular.toUpperCase()));
+      const b = document.createElement("div"); b.append(makeText("small", "", "VENCE"), makeText("span", "", t.vence));
+      bot.append(a, b); c.append(top, num, bot);
+      const acts = document.createElement("div"); acts.className = "tcard__acts";
+      if (!t.predeterminada) { const p = makeText("button", "", "Hacer predeterminada"); p.type = "button"; p.onclick = () => { Tarjetas.hacerPredeterminada(t.id); pintar(); }; acts.append(p); }
+      const d = makeText("button", "", "Eliminar"); d.type = "button";
+      d.onclick = () => { if (confirm("¿Eliminar esta tarjeta?")) { Tarjetas.quitar(t.id); pintar(); } };
+      acts.append(d); box.append(c, acts); return box;
+    }));
+  }
+
+  $("number").addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim(); });
+  $("expiry").addEventListener("input", e => { let d = e.target.value.replace(/\D/g, "").slice(0, 4); e.target.value = d.length > 2 ? d.slice(0, 2) + "/" + d.slice(2) : d; });
+
+  $("form").addEventListener("submit", e => {
+    e.preventDefault();
+    const err = t => { $("error").textContent = t; $("error").hidden = !t; $("okmsg").hidden = true; };
+    const titular = $("name").value.trim(), numero = $("number").value.replace(/\D/g, ""), vence = $("expiry").value;
+    if (titular.length < 3) return err("Escribe el nombre del titular.");
+    if (numero.length !== 16 || !luhn(numero)) return err("El número de tarjeta no es válido. Usa una tarjeta de prueba.");
+    if (!vigente(vence)) return err("Revisa la fecha de vencimiento.");
+    const r = Tarjetas.agregar({ titular, numero, vence }, $("def").checked);
+    if (r === "duplicada") return err("Esa tarjeta ya está guardada.");
+    if (r === "error") return err("No pudimos guardar la tarjeta (¿navegación privada?).");
+    err(""); $("form").reset(); $("okmsg").textContent = "✓ Tarjeta guardada."; $("okmsg").hidden = false; pintar();
+  });
+
+  pintar();
+  </script>
+</body>
+</html>
