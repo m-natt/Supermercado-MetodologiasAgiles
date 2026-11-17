@@ -5,12 +5,12 @@ const ULTIMO_PEDIDO_KEY = "supermercado_ultimo_pedido";
 
 const METODOS = {
   efectivo: {
-    nombre: "💵 Efectivo al recibir",
-    ayuda: "Paga al repartidor cuando llegue tu pedido. Si puedes, ten el monto exacto.",
+    nombre: "💵 Pago contra entrega (efectivo)",
+    ayuda: "No necesitas pagar por adelantado. Liquida el total en efectivo directamente con el repartidor cuando recibas tus productos. Si puedes, ten el monto exacto.",
   },
   tarjeta: {
-    nombre: "💳 Tarjeta al recibir",
-    ayuda: "El repartidor llevará una terminal para cobrarte con tarjeta al entregar.",
+    nombre: "💳 Pago contra entrega (tarjeta)",
+    ayuda: "No necesitas pagar por adelantado. El repartidor llevará una terminal para que pagues con tarjeta cuando recibas tus productos.",
   },
   transferencia: {
     nombre: "🏦 Transferencia",
@@ -21,6 +21,14 @@ const METODOS = {
     ayuda: "Pago de prueba: no se hizo ningún cobro real.",
   },
 };
+
+// Estado del pago con tarjeta en línea (lo guarda pago.js en el pedido)
+function showDeliveryPayment(order) {
+  if (!["efectivo", "tarjeta"].includes(order.metodo_pago)) return;
+  const box = makeText("p", "pay-status pay-status--pending",
+    "⏳ Pago pendiente de cobro contra entrega. El importe se pagará al repartidor cuando recibas tu pedido.");
+  $("confirm-method-help").after(box);
+}
 
 // Estado del pago con tarjeta en línea (lo guarda pago.js en el pedido)
 function showCardPayment(order) {
@@ -125,6 +133,7 @@ function showOrder(order) {
 
   $("confirm-method").textContent = metodo.nombre;
   $("confirm-method-help").textContent = metodo.ayuda;
+  showDeliveryPayment(order);
   showCardPayment(order);
   $("confirm-contact").textContent =
     [[cliente.nombre, cliente.apellidos].filter(Boolean).join(" "), cliente.correo].filter(Boolean).join(" · ");
