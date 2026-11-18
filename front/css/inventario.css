@@ -1,0 +1,93 @@
+/* =====================================================
+   inventario.css — Inventario y alertas de bajo stock.
+   Se carga DESPUÉS de styles.css, diseno.css y checkout.css
+   y usa sus variables (--green, --line, --muted, --ink...).
+   ===================================================== */
+
+.inv-subtitle { margin: -12px 0 22px; color: var(--muted); font-size: 15px; }
+
+/* ---------- Alerta de bajo stock ---------- */
+.inv-alert {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  margin: 0 0 20px; padding: 14px 18px; border-radius: 14px; border: 1px solid transparent;
+}
+.inv-alert[hidden] { display: none; }
+.inv-alert__text { margin: 0; font-size: 15px; font-weight: 700; line-height: 1.4; }
+.inv-alert--warn { background: #fff4dc; border-color: #f0d28a; color: #7a4b00; }
+.inv-alert--ok { background: #e6f4ea; border-color: #b7dcc2; color: #1e6b3a; }
+
+/* ---------- Tarjetas de resumen ---------- */
+.inv-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 0 0 22px; }
+.inv-card { display: grid; gap: 6px; padding: 18px 20px; background: #fff; border: 1px solid var(--line); border-radius: 15px; }
+.inv-card__label { color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
+.inv-card__value { font-size: 30px; letter-spacing: -1px; line-height: 1.1; }
+.inv-card--agotado { border-color: #f1c9c4; background: #fff8f7; }
+.inv-card--agotado .inv-card__value { color: #a12a1f; }
+.inv-card--bajo { border-color: #f0d28a; background: #fffbf1; }
+.inv-card--bajo .inv-card__value { color: #8a5300; }
+
+/* ---------- Barra de búsqueda y filtros ---------- */
+.inv-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; margin: 0 0 16px; }
+.inv-field { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
+.inv-field--grow { flex: 1 1 220px; }
+.inv-field input,
+.inv-field select {
+  min-width: 150px; padding: 10px 12px; border: 1px solid #d6e7dc; border-radius: 9px;
+  background: #fff; color: var(--ink); font: inherit; font-size: 14px; font-weight: 500; letter-spacing: 0; text-transform: none;
+}
+.inv-field--grow input { width: 100%; }
+#inv-threshold { min-width: 0; width: 120px; }
+
+/* ---------- Mensajes ---------- */
+.inv-message { margin: 0 0 14px; padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+.inv-message[hidden] { display: none; }
+.inv-message--ok { background: #e6f4ea; color: #1e6b3a; }
+.inv-message--error { background: #fdecea; color: #a12a1f; }
+.inv-status { margin: 0; padding: 28px 10px; text-align: center; color: var(--muted); font-size: 15px; }
+.inv-status[hidden] { display: none; }
+
+/* ---------- Tabla ---------- */
+.inv-table-wrap { overflow-x: auto; }
+.inv-table { width: 100%; min-width: 680px; border-collapse: collapse; }
+.inv-table th {
+  padding: 10px 12px; border-bottom: 2px solid var(--line); text-align: left;
+  color: var(--muted); font-size: 12px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; white-space: nowrap;
+}
+.inv-table td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.inv-table .inv-num { text-align: right; white-space: nowrap; }
+.inv-name { display: block; font-size: 15px; }
+.inv-meta { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+.inv-stock { display: block; font-size: 20px; letter-spacing: -.5px; }
+.inv-row--agotado { background: #fff8f7; }
+.inv-row--bajo { background: #fffbf1; }
+
+/* ---------- Estado (etiqueta) ---------- */
+.inv-badge { display: inline-block; padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.inv-badge--agotado { background: #fdecea; color: #a12a1f; }
+.inv-badge--bajo { background: #fff1d6; color: #8a5300; }
+.inv-badge--ok { background: #e6f4ea; color: #1e6b3a; }
+
+/* ---------- Ajustar existencias ---------- */
+.inv-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.inv-qty { width: 84px; padding: 8px 10px; border: 1px solid #d6e7dc; border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; }
+.inv-btn {
+  padding: 8px 12px; border: 1px solid #e6cfcf; border-radius: 8px; background: #fff; color: var(--green);
+  font: inherit; font-size: 13px; font-weight: 750; cursor: pointer; white-space: nowrap;
+}
+.inv-btn:hover { background: var(--green-soft); }
+.inv-btn--add { border-color: var(--green); background: var(--green); color: #fff; }
+.inv-btn--add:hover { background: var(--green-dark); }
+.inv-btn:disabled { opacity: .55; cursor: wait; }
+.inv-qty:focus-visible,
+.inv-btn:focus-visible,
+.inv-field input:focus-visible,
+.inv-field select:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+@media (max-width: 900px) { .inv-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) {
+  .inv-cards { grid-template-columns: 1fr; }
+  .inv-field,
+  .inv-field input,
+  .inv-field select,
+  #inv-threshold { width: 100%; }
+}

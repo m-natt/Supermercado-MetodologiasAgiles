@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Inventario y alertas de bajo stock">
+  <title>Supermercado Bonito :3 | Inventario</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/diseno.css">
+  <link rel="stylesheet" href="css/checkout.css">
+  <link rel="stylesheet" href="css/inventario.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/carrito.js" defer></script>
+  <script src="js/inventario.js" defer></script>
+</head>
+<body>
+
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario">
+        <span class="usuario__icono">👤</span>
+        Mi cuenta
+      </a>
+      <a href="checkout.html" class="carrito">
+        <span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container checkout-page inv-page">
+    <a href="usuarios.html" class="back-link">← Volver a mi cuenta</a>
+    <h1 class="page-title">Inventario</h1>
+    <p class="inv-subtitle">Revisa las existencias, detecta lo que se está acabando y repón el stock.</p>
+
+    <!-- Alerta de bajo stock: se llena desde js/inventario.js -->
+    <div id="inv-alert" class="inv-alert" role="status" aria-live="polite" hidden>
+      <p id="inv-alert-text" class="inv-alert__text"></p>
+      <button type="button" id="inv-alert-button" class="secondary-button">Ver solo alertas</button>
+    </div>
+
+    <section class="inv-cards" aria-label="Resumen del inventario">
+      <article class="inv-card">
+        <span class="inv-card__label">Productos activos</span>
+        <strong id="sum-total" class="inv-card__value">–</strong>
+      </article>
+      <article class="inv-card inv-card--agotado">
+        <span class="inv-card__label">Agotados</span>
+        <strong id="sum-agotados" class="inv-card__value">–</strong>
+      </article>
+      <article class="inv-card inv-card--bajo">
+        <span class="inv-card__label">Stock bajo</span>
+        <strong id="sum-bajos" class="inv-card__value">–</strong>
+      </article>
+      <article class="inv-card">
+        <span class="inv-card__label">Unidades en existencia</span>
+        <strong id="sum-unidades" class="inv-card__value">–</strong>
+      </article>
+    </section>
+
+    <section class="panel" aria-labelledby="inv-title">
+      <div class="panel__head">
+        <h2 id="inv-title">Existencias</h2>
+        <span id="inv-count" class="product-count"></span>
+      </div>
+
+      <div class="inv-toolbar">
+        <label class="inv-field inv-field--grow">
+          <span>Buscar</span>
+          <input id="inv-search" type="search" placeholder="Producto, categoría o marca" autocomplete="off">
+        </label>
+        <label class="inv-field">
+          <span>Mostrar</span>
+          <select id="inv-filter">
+            <option value="todos">Todos</option>
+            <option value="alertas">Con alertas (agotados y bajos)</option>
+            <option value="agotado">Solo agotados</option>
+            <option value="bajo">Solo stock bajo</option>
+            <option value="ok">Stock normal</option>
+          </select>
+        </label>
+        <label class="inv-field">
+          <span>Stock bajo: hasta</span>
+          <input id="inv-threshold" type="number" min="0" max="100000" step="1" value="10" inputmode="numeric">
+        </label>
+        <button type="button" id="inv-refresh" class="secondary-button">↻ Actualizar</button>
+      </div>
+
+      <p id="inv-message" class="inv-message" role="status" aria-live="polite" hidden></p>
+      <p id="inv-status" class="inv-status" role="status">Cargando inventario…</p>
+
+      <div class="inv-table-wrap">
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th scope="col">Producto</th>
+              <th scope="col" class="inv-num">Stock</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Ajustar existencias</th>
+            </tr>
+          </thead>
+          <tbody id="inv-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    © <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados
+  </footer>
+</body>
+</html>

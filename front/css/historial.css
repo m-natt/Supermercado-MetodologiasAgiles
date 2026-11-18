@@ -1,0 +1,62 @@
+/* =====================================================
+   historial.css — Historial de pedidos y compras frecuentes.
+   Se carga DESPUÉS de styles.css, diseno.css y checkout.css
+   y usa sus variables (--green, --line, --muted, --ink...).
+   ===================================================== */
+
+.hist-content { display: grid; gap: 28px; }
+.hist-content[hidden],
+.hist-message[hidden],
+.hist-status[hidden] { display: none; }
+.hist-status { margin: 0; padding: 18px 6px; color: var(--muted); font-size: 15px; }
+.hist-orders .panel__head { margin-bottom: 14px; }
+
+/* ---------- Avisos (se quedan visibles al bajar por la página) ---------- */
+.hist-message {
+  position: sticky; top: 96px; z-index: 5;
+  padding: 12px 16px; border-radius: 12px; border: 1px solid transparent;
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, .25); font-size: 14px; line-height: 1.5;
+}
+.hist-message--ok { background: #e6f4ea; border-color: #b7dcc2; color: #1e6b3a; }
+.hist-message--warn { background: #fff4dc; border-color: #f0d28a; color: #7a4b00; }
+.hist-message--error { background: #fdecea; border-color: #f1c9c4; color: #a12a1f; }
+.hist-message__line { margin: 0 0 4px; font-weight: 600; }
+.hist-message__link { display: inline-block; margin-top: 4px; color: inherit; font-weight: 800; }
+
+/* ---------- Compras frecuentes ---------- */
+.freq-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.freq-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff;
+}
+.freq-item__info { display: grid; gap: 3px; min-width: 0; }
+.freq-item__name { font-size: 15px; }
+.freq-item__meta { color: var(--muted); font-size: 12px; }
+.freq-item__price { margin-top: 2px; font-size: 14px; font-weight: 800; }
+.freq-item__button { flex: 0 0 auto; padding: 10px 16px; font-size: 14px; white-space: nowrap; }
+
+/* ---------- Historial ---------- */
+.orders-list { display: grid; gap: 16px; }
+.hist-order__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.hist-order__title { margin: 0; font-size: 18px; letter-spacing: -.3px; }
+.hist-order__date { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; }
+.hist-badge { padding: 5px 12px; border-radius: 999px; background: var(--green-soft); color: var(--green); font-size: 12px; font-weight: 800; white-space: nowrap; }
+.hist-items { display: grid; gap: 0; margin: 0 0 14px; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+.hist-item { display: flex; justify-content: space-between; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.hist-item__total { font-weight: 700; white-space: nowrap; }
+.hist-item__note { color: var(--muted); }
+.hist-order__foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.hist-order__totals { display: grid; gap: 2px; }
+.hist-order__meta { color: var(--muted); font-size: 13px; }
+.hist-order__total { font-size: 17px; }
+.hist-order__button { padding: 10px 18px; font-size: 14px; }
+.hist-order__button:disabled { opacity: .6; cursor: wait; }
+
+.freq-item__button:focus-visible,
+.hist-order__button:focus-visible,
+.hist-message__link:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+@media (max-width: 760px) {
+  .freq-list { grid-template-columns: 1fr; }
+  .hist-message { top: 84px; }
+}
