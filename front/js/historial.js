@@ -168,7 +168,18 @@ function tarjetaPedido(pedido) {
   boton.type = "button";
   boton.addEventListener("click", () => volverAPedir(pedido, boton));
 
-  pie.append(totales, boton);
+  // Factura (simulada): solo para pedidos pagados
+  const acciones = document.createElement("div");
+  acciones.className = "hist-order__actions";
+  if (pedido.id_factura || pedido.pago_estado === "aprobado") {
+    const factura = makeText("a", "secondary-button hist-order__button",
+      pedido.id_factura ? "🧾 Ver factura" : "🧾 Facturar");
+    factura.href = `factura.html?pedido=${encodeURIComponent(pedido.id_pedido)}`;
+    acciones.append(factura);
+  }
+  acciones.append(boton);
+
+  pie.append(totales, acciones);
   articulo.append(cabecera, lista, pie);
   return articulo;
 }

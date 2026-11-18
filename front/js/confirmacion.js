@@ -37,6 +37,12 @@ function showCardPayment(order) {
   if (order.pago?.estado === "aprobado") {
     box.classList.add("pay-status--ok");
     box.textContent = `✓ Pagado con ${order.pago.tarjeta} · Folio ${order.pago.folio}`;
+    // Factura simulada: solo para clientes con cuenta (los invitados no facturan)
+    if (typeof Sesion !== "undefined" && Sesion.leer()) {
+      const factura = makeText("a", "", "🧾 Solicitar factura");
+      factura.href = `factura.html?pedido=${encodeURIComponent(order.id_pedido)}`;
+      box.append(" · ", factura);
+    }
   } else {
     box.classList.add("pay-status--pending");
     box.append("⏳ Pago pendiente. ");

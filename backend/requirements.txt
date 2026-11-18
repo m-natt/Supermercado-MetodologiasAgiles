@@ -4,3 +4,4 @@ pymysql
 cryptography
 python-dotenv
 pwdlib[argon2]
+fpdf2

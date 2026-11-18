@@ -28,7 +28,12 @@ def pedidos_del_cliente(id_cliente, limite=20):
         """SELECT p.id_pedido, p.fecha, p.estado, p.total, p.costo_envio, p.fecha_entrega,
                   (SELECT pg.metodo FROM pagos pg
                    WHERE pg.id_pedido = p.id_pedido
-                   ORDER BY pg.id_pago DESC LIMIT 1) AS metodo_pago
+                   ORDER BY pg.id_pago DESC LIMIT 1) AS metodo_pago,
+                  (SELECT pg.estado FROM pagos pg
+                   WHERE pg.id_pedido = p.id_pedido
+                   ORDER BY pg.id_pago DESC LIMIT 1) AS pago_estado,
+                  (SELECT f.id_factura FROM facturas f
+                   WHERE f.id_pedido = p.id_pedido) AS id_factura
            FROM pedidos p
            WHERE p.id_cliente = %s
            ORDER BY p.fecha DESC, p.id_pedido DESC
@@ -71,6 +76,8 @@ def pedidos_del_cliente(id_cliente, limite=20):
             "fecha": p["fecha"],
             "estado": p["estado"],
             "metodo_pago": p["metodo_pago"],
+            "pago_estado": p["pago_estado"],
+            "id_factura": p["id_factura"],  # None si todavía no tiene factura
             "fecha_entrega": p["fecha_entrega"],
             "costo_envio": p["costo_envio"],
             "total": p["total"],

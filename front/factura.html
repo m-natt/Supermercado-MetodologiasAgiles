@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supermercado Bonito :3 | Factura</title>
+  <link rel="stylesheet" href="css/styles.css?v=2026111802">
+  <link rel="stylesheet" href="css/diseno.css?v=2026111802">
+  <link rel="stylesheet" href="css/checkout.css?v=2026111802">
+  <script src="js/config.js?v=2026111802" defer></script>
+  <script src="js/carrito.js?v=2026111802" defer></script>
+  <script src="js/sesion.js?v=2026111802" defer></script>
+  <script src="js/factura.js?v=2026111802" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario"><span class="usuario__icono">👤</span> Mi cuenta</a>
+      <a href="checkout.html" class="carrito"><span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span></a>
+    </div>
+  </header>
+
+  <main class="container checkout-page">
+    <a href="historial.html" class="back-link">← Mis pedidos</a>
+    <h1 class="page-title" id="fac-title">Factura</h1>
+    <p class="demo-banner">🧪 Facturación simulada: los documentos no son CFDI reales y no tienen validez fiscal.</p>
+
+    <!-- Mensajes: sin sesión, pedido no encontrado, no pagado... -->
+    <section id="fac-message" class="panel empty-cart" hidden>
+      <span class="empty-cart__icon" aria-hidden="true">🧾</span>
+      <h2 id="fac-message-title"></h2>
+      <p id="fac-message-text"></p>
+      <a id="fac-message-link" class="primary-button" href="historial.html">Ir a mis pedidos</a>
+    </section>
+
+    <div id="fac-layout" class="checkout-layout" hidden>
+      <div class="checkout-main">
+        <!-- Formulario de datos fiscales (si todavía no hay factura) -->
+        <form id="fac-form" class="panel" novalidate aria-labelledby="fac-form-title" hidden>
+          <h2 id="fac-form-title">Datos fiscales</h2>
+          <p class="note">Usa <strong>XAXX010101000</strong> y "PÚBLICO EN GENERAL" si no tienes RFC.</p>
+          <div class="field-grid">
+            <label class="field"><span>RFC *</span>
+              <input id="rfc" maxlength="13" autocomplete="off" placeholder="XAXX010101000" class="upper"></label>
+            <label class="field"><span>Código postal fiscal *</span>
+              <input id="cp" maxlength="5" inputmode="numeric" placeholder="64000"></label>
+            <label class="field field--wide"><span>Nombre o razón social *</span>
+              <input id="razon" maxlength="254" placeholder="Como aparece en tu constancia fiscal" class="upper"></label>
+            <label class="field field--wide"><span>Régimen fiscal *</span>
+              <select id="regimen"></select></label>
+            <label class="field field--wide"><span>Uso del CFDI *</span>
+              <select id="uso"></select></label>
+            <label class="field field--check">
+              <input type="checkbox" id="guardar" checked> Guardar mis datos para la próxima
+            </label>
+          </div>
+          <p id="fac-error" class="form-error" role="alert" hidden></p>
+          <button type="submit" id="fac-submit" class="primary-button">Generar factura</button>
+        </form>
+
+        <!-- Factura ya generada -->
+        <section id="fac-done" class="panel" aria-labelledby="fac-done-title" hidden>
+          <h2 id="fac-done-title">✓ Factura generada</h2>
+          <dl class="summary__rows">
+            <div><dt>Folio</dt><dd id="d-folio"></dd></div>
+            <div><dt>Folio fiscal (UUID de prueba)</dt><dd id="d-uuid" class="mono"></dd></div>
+            <div><dt>Fecha</dt><dd id="d-fecha"></dd></div>
+            <div><dt>RFC</dt><dd id="d-rfc"></dd></div>
+            <div><dt>Razón social</dt><dd id="d-razon"></dd></div>
+          </dl>
+          <div class="confirm-actions fac-downloads">
+            <button type="button" id="btn-pdf" class="primary-button">⬇ Descargar PDF</button>
+            <button type="button" id="btn-xml" class="secondary-button">⬇ Descargar XML</button>
+          </div>
+          <p id="fac-download-error" class="form-error" role="alert" hidden></p>
+        </section>
+      </div>
+
+      <aside class="panel summary" aria-labelledby="fac-summary-title">
+        <h2 id="fac-summary-title">Pedido</h2>
+        <dl class="summary__rows">
+          <div><dt>Número</dt><dd id="s-pedido"></dd></div>
+          <div><dt>Fecha</dt><dd id="s-fecha"></dd></div>
+          <div><dt>Subtotal</dt><dd id="s-subtotal">—</dd></div>
+          <div><dt>IVA 16%</dt><dd id="s-iva">—</dd></div>
+          <div class="summary__total"><dt>Total</dt><dd id="s-total"></dd></div>
+        </dl>
+        <p class="summary__note">Los precios ya incluyen IVA; la factura solo lo desglosa.</p>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="pie">© <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados</footer>
+</body>
+</html>
