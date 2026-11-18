@@ -93,3 +93,7 @@ class LimiteIntentos:
 # 5 fallos por correo o 20 por IP en 15 minutos
 intentos_por_correo = LimiteIntentos(maximo=5, ventana_segundos=15 * 60)
 intentos_por_ip = LimiteIntentos(maximo=20, ventana_segundos=15 * 60)
+
+# Pedir códigos de recuperación: 3 por correo o 10 por IP cada 15 minutos
+codigos_por_correo = LimiteIntentos(maximo=3, ventana_segundos=15 * 60)
+codigos_por_ip = LimiteIntentos(maximo=10, ventana_segundos=15 * 60)

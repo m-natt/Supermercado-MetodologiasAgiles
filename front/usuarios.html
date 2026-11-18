@@ -59,8 +59,8 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #6259
 }
 </style>
 <!-- Sin defer: el script de abajo los usa al cargar -->
-<script src="js/config.js?v=2026111802"></script>
-<script src="js/sesion.js?v=2026111802"></script>
+<script src="js/config.js?v=2026111803"></script>
+<script src="js/sesion.js?v=2026111803"></script>
 </head>
 <body>
 
@@ -79,6 +79,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #6259
   </form>
   <p id="loginError" class="error" role="alert"></p>
   <p id="loginInfo" class="success" role="status"></p>
+  <p class="switch"><button type="button" class="link-button" onclick="showAuth('recover')">¿Olvidaste tu contraseña?</button></p>
   <p class="switch">¿Eres cliente nuevo? <button type="button" class="link-button" onclick="showAuth('register')">Crea tu cuenta</button></p>
   <p class="switch"><a href="index.html">← Volver a la tienda</a></p>
  </div>
@@ -106,6 +107,32 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #6259
   </form>
   <p id="registerError" class="error" role="alert"></p>
   <p class="switch">¿Ya tienes cuenta? <button type="button" class="link-button" onclick="showAuth('login')">Inicia sesión</button></p>
+ </div>
+
+ <!-- Recuperar contraseña (clientes). El código llega a la terminal del backend (correo simulado) -->
+ <div id="recoverBox" class="login-box hidden">
+  <h1>Recuperar contraseña</h1>
+  <form id="recoverForm">
+   <p>Escribe el correo de tu cuenta y te enviaremos un código de 6 dígitos.</p>
+   <label for="recEmail">Correo electrónico</label>
+   <input id="recEmail" type="email" required maxlength="150" autocomplete="email">
+   <button id="recoverButton" class="primary" style="width:100%">Enviar código</button>
+  </form>
+  <form id="resetForm" class="hidden">
+   <p id="resetIntro"></p>
+   <label for="recCode">Código de 6 dígitos</label>
+   <input id="recCode" required inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="000000">
+   <label for="recPass">Contraseña nueva</label>
+   <input id="recPass" type="password" required minlength="8" maxlength="128" autocomplete="new-password">
+   <small class="hint">Mínimo 8 caracteres, con al menos una letra y un número.</small>
+   <label for="recPass2">Repite la contraseña nueva</label>
+   <input id="recPass2" type="password" required minlength="8" maxlength="128" autocomplete="new-password">
+   <button id="resetButton" class="primary" style="width:100%">Cambiar contraseña</button>
+   <p class="switch"><button type="button" class="link-button" onclick="recoverStep(1)">Pedir otro código</button></p>
+  </form>
+  <p id="recoverError" class="error" role="alert"></p>
+  <p id="recoverInfo" class="success" role="status"></p>
+  <p class="switch"><button type="button" class="link-button" onclick="showAuth('login')">← Volver a iniciar sesión</button></p>
  </div>
 
  <!-- Cliente con sesión iniciada -->
@@ -254,11 +281,65 @@ function has(permission){return current && getRole(current.roleId)?.[permission]
 
 /* ===== Cuentas de clientes (backend + MySQL, contraseñas con pwdlib) ===== */
 function showAuth(view){
- ["loginBox","registerBox","clientBox"].forEach(id=>$(id).classList.add("hidden"));
- $({login:"loginBox",register:"registerBox",client:"clientBox"}[view]).classList.remove("hidden");
+ ["loginBox","registerBox","recoverBox","clientBox"].forEach(id=>$(id).classList.add("hidden"));
+ $({login:"loginBox",register:"registerBox",recover:"recoverBox",client:"clientBox"}[view]).classList.remove("hidden");
  $("loginError").textContent="";$("registerError").textContent="";
  if(view!=="login")$("loginInfo").textContent="";
+ if(view==="recover")recoverStep(1);
 }
+
+/* ===== ¿Olvidaste tu contraseña? (el código llega a la terminal del backend) ===== */
+function recoverStep(step){
+ $("recoverForm").classList.toggle("hidden",step!==1);
+ $("resetForm").classList.toggle("hidden",step!==2);
+ $("recoverError").textContent="";$("recoverInfo").textContent="";
+ if(step===1){
+  $("resetForm").reset();
+  // Si ya había escrito su correo en el login, se rellena solo
+  const escrito=$("loginUser").value.trim();
+  if(!$("recEmail").value&&escrito.includes("@"))$("recEmail").value=escrito;
+ }
+}
+
+$("recoverForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const correo=$("recEmail").value.trim();
+ busy($("recoverButton"),"Enviando…");
+ try{
+  await api("/api/clientes/recuperar",{method:"POST",body:JSON.stringify({correo})});
+  recoverStep(2);
+  $("resetIntro").textContent="Si "+correo+" está registrado, te enviamos un código. Vence en 15 minutos.";
+  $("recCode").focus();
+ }catch(err){
+  $("recoverError").textContent=err.message;
+ }finally{
+  busy($("recoverButton"));
+ }
+});
+
+$("recCode").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"").slice(0,6)});
+
+$("resetForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const contrasena=$("recPass").value;
+ if(contrasena!==$("recPass2").value)return $("recoverError").textContent="Las contraseñas no coinciden.";
+ if(!/[a-zA-ZÀ-ÿ]/.test(contrasena)||!/[0-9]/.test(contrasena))return $("recoverError").textContent="La contraseña debe tener al menos una letra y un número.";
+ $("recoverError").textContent="";
+ busy($("resetButton"),"Cambiando…");
+ try{
+  const correo=$("recEmail").value.trim();
+  await api("/api/clientes/recuperar/confirmar",{method:"POST",body:JSON.stringify({correo,codigo:$("recCode").value,contrasena})});
+  $("resetForm").reset();
+  showAuth("login");
+  $("loginUser").value=correo;
+  $("loginInfo").textContent="✓ Tu contraseña se cambió. Ya puedes iniciar sesión.";
+  $("loginPass").focus();
+ }catch(err){
+  $("recoverError").textContent=err.status===422?"Revisa el código (6 dígitos) y la contraseña.":err.message;
+ }finally{
+  busy($("resetButton"));
+ }
+});
 
 function showClient(cliente){
  $("clientHello").textContent="¡Hola, "+cliente.nombre+"!";
