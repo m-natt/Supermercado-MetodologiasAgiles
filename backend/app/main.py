@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.routers import (
-    categorias, clientes, cobertura, direcciones, facturas, health, historial, inventario, marcas,
+    admin, categorias, clientes, cobertura, direcciones, facturas, health, historial, inventario, marcas,
     pedidos, productos,
 )
 
@@ -55,6 +55,7 @@ def inicio():
 
 
 app.include_router(health.router)
+app.include_router(admin.router)
 app.include_router(categorias.router)
 app.include_router(marcas.router)
 app.include_router(productos.router)
