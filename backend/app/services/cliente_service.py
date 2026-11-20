@@ -7,7 +7,7 @@ from app.seguridad import (
 from app.services.pedido_service import CONTRASENA_INVITADO
 
 # Columnas que se pueden mostrar. La contraseña nunca sale del backend.
-COLUMNAS_PUBLICAS = "c.id_cliente, c.nombre, c.apellidos, c.correo, c.telefono"
+COLUMNAS_PUBLICAS = "c.id_cliente, c.nombre, c.apellidos, c.correo, c.telefono, c.rol"
 
 
 class CorreoRegistrado(Exception):
