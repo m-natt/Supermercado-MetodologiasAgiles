@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supermercado Bonito :3 | Administración</title>
+  <link rel="stylesheet" href="css/styles.css?v=2026111802">
+  <link rel="stylesheet" href="css/diseno.css?v=2026111802">
+  <link rel="stylesheet" href="css/checkout.css?v=2026111802">
+  <link rel="stylesheet" href="css/inventario.css?v=2026111802">
+  <link rel="stylesheet" href="css/admin.css?v=2026111802">
+  <script src="js/config.js?v=2026111802" defer></script>
+  <script src="js/sesion.js?v=2026111802" defer></script>
+  <script src="js/admin.js?v=2026111802" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario"><span class="usuario__icono">👤</span> Mi cuenta</a>
+    </div>
+  </header>
+
+  <main class="container checkout-page inv-page">
+    <!-- Se muestra si no hay sesión o no es administrador -->
+    <section id="adm-gate" class="panel adm-gate" hidden>
+      <h2 id="adm-gate-title"></h2>
+      <p id="adm-gate-text"></p>
+      <a href="usuarios.html" class="primary-button">Ir a mi cuenta</a>
+    </section>
+
+    <div id="adm-app" hidden>
+      <h1 class="page-title">Panel de administración</h1>
+      <p id="adm-message" class="inv-message" role="status" aria-live="polite" hidden></p>
+
+      <div class="adm-tabs" role="tablist">
+        <button class="adm-tab" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+        <button class="adm-tab" role="tab" data-tab="productos" aria-selected="false">Productos</button>
+        <button class="adm-tab" role="tab" data-tab="pedidos" aria-selected="false">Pedidos</button>
+        <button class="adm-tab" role="tab" data-tab="usuarios" aria-selected="false">Usuarios</button>
+        <a class="adm-tab" href="inventario.html" style="text-decoration:none">Inventario ↗</a>
+      </div>
+
+      <!-- RESUMEN -->
+      <section id="tab-resumen" data-panel>
+        <div id="adm-cards" class="inv-cards"></div>
+        <div class="adm-grid">
+          <article class="panel"><h2>Pedidos por estado</h2><ul id="adm-estados" class="adm-list"></ul></article>
+          <article class="panel"><h2>Más vendidos</h2><ul id="adm-top" class="adm-list"></ul></article>
+        </div>
+        <article class="panel"><h2>Últimos pedidos</h2>
+          <div class="inv-table-wrap"><table class="inv-table"><thead><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead><tbody id="adm-ultimos"></tbody></table></div>
+        </article>
+      </section>
+
+      <!-- PRODUCTOS -->
+      <section id="tab-productos" data-panel hidden>
+        <div class="panel">
+          <div class="adm-toolbar">
+            <label class="inv-field inv-field--grow"><span>Buscar</span><input id="prod-search" type="search" placeholder="Nombre, categoría o marca"></label>
+            <button type="button" id="prod-new" class="primary-button">+ Nuevo producto</button>
+          </div>
+          <div class="inv-table-wrap"><table class="inv-table"><thead><tr><th>Producto</th><th class="inv-num">Precio</th><th class="inv-num">Stock</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="prod-body"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- PEDIDOS -->
+      <section id="tab-pedidos" data-panel hidden>
+        <div class="panel">
+          <div class="adm-toolbar">
+            <label class="inv-field"><span>Mostrar</span>
+              <select id="ped-filter"><option value="">Todos</option><option value="confirmado">Confirmados</option><option value="preparando">Preparando</option><option value="en_camino">En camino</option><option value="entregado">Entregados</option><option value="cancelado">Cancelados</option></select>
+            </label>
+          </div>
+          <div class="inv-table-wrap"><table class="inv-table"><thead><tr><th>Pedido</th><th>Cliente</th><th class="inv-num">Total</th><th>Pago</th><th>Estado</th></tr></thead><tbody id="ped-body"></tbody></table></div>
+        </div>
+      </section>
+
+      <!-- USUARIOS -->
+      <section id="tab-usuarios" data-panel hidden>
+        <div class="panel">
+          <div class="inv-table-wrap"><table class="inv-table"><thead><tr><th>Cliente</th><th>Correo</th><th class="inv-num">Pedidos</th><th>Rol</th></tr></thead><tbody id="usr-body"></tbody></table></div>
+        </div>
+      </section>
+    </div>
+
+    <p id="adm-status" class="inv-status">Verificando acceso…</p>
+  </main>
+
+  <dialog id="prod-dialog" class="adm-dialog">
+    <h2 id="prod-dialog-title">Producto</h2>
+    <form id="prod-form" class="adm-form" method="dialog">
+      <label class="inv-field adm-full"><span>Nombre</span><input name="nombre" required maxlength="150"></label>
+      <label class="inv-field"><span>Categoría</span><select name="id_categoria" required></select></label>
+      <label class="inv-field"><span>Marca</span><select name="id_marca"></select></label>
+      <label class="inv-field"><span>Precio (MXN)</span><input name="precio" type="number" min="0" step="0.01" required></label>
+      <label class="inv-field"><span>Unidad</span><input name="unidad" required maxlength="20" placeholder="kg, pza, litro…"></label>
+      <label class="inv-field"><span>Stock</span><input name="stock" type="number" min="0" step="1" required></label>
+      <label class="inv-field"><span>URL de imagen</span><input name="imagen_url" maxlength="255"></label>
+      <label class="inv-field adm-full"><span>Descripción</span><textarea name="descripcion" rows="3"></textarea></label>
+      <label class="inv-field adm-full"><span><input name="activo" type="checkbox" checked> Visible en la tienda</span></label>
+      <p id="prod-error" class="inv-message inv-message--error adm-full" hidden></p>
+      <div class="adm-form-actions">
+        <button type="button" id="prod-cancel" class="secondary-button">Cancelar</button>
+        <button type="submit" class="primary-button">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
