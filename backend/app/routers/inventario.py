@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from app.dependencias import admin_actual
 
 from app.schemas.inventario import AjusteEntrada, StockEntrada
 from app.services import inventario_service
 
-router = APIRouter(prefix="/api/inventario", tags=["inventario"])
+router = APIRouter(prefix="/api/inventario", tags=["inventario"], dependencies=[Depends(admin_actual)])
 
 
 def _o_error(funcion, *args):

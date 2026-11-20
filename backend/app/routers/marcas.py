@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import Depends, APIRouter, HTTPException
+
+from app.dependencias import admin_actual
 
 from app.schemas.marca import MarcaEntrada
 from app.services import marca_service
@@ -23,18 +25,18 @@ def obtener(id_marca: int):
     return {"ok": True, "data": _buscar_o_404(id_marca)}
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, dependencies=[Depends(admin_actual)])
 def crear(datos: MarcaEntrada):
     return {"ok": True, "data": marca_service.crear(datos)}
 
 
-@router.put("/{id_marca}")
+@router.put("/{id_marca}", dependencies=[Depends(admin_actual)])
 def actualizar(id_marca: int, datos: MarcaEntrada):
     _buscar_o_404(id_marca)
     return {"ok": True, "data": marca_service.actualizar(id_marca, datos)}
 
 
-@router.delete("/{id_marca}")
+@router.delete("/{id_marca}", dependencies=[Depends(admin_actual)])
 def eliminar(id_marca: int):
     # Si tiene productos, MySQL lanza IntegrityError y main.py responde 409
     _buscar_o_404(id_marca)

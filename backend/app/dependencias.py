@@ -40,3 +40,10 @@ def cliente_opcional(token: Optional[str] = Depends(token_actual)):
     if cliente is None:
         raise _sesion_invalida()
     return cliente
+
+
+def admin_actual(cliente=Depends(cliente_actual)):
+    """Exige sesión iniciada Y rol de administrador (401 sin sesión, 403 sin permiso)."""
+    if cliente.get("rol") != "administrador":
+        raise HTTPException(status_code=403, detail="No tienes permiso para hacer esto.")
+    return cliente

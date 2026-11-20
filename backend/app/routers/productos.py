@@ -1,7 +1,9 @@
 from decimal import Decimal
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import Depends, APIRouter, HTTPException, Query
+
+from app.dependencias import admin_actual
 
 from app.schemas.producto import ProductoEntrada
 from app.services import producto_service
@@ -42,19 +44,19 @@ def obtener(id_producto: int):
     return {"ok": True, "data": _buscar_o_404(id_producto)}
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, dependencies=[Depends(admin_actual)])
 def crear(datos: ProductoEntrada):
     # Si la categoria o marca no existen, main.py responde 409
     return {"ok": True, "data": producto_service.crear(datos)}
 
 
-@router.put("/{id_producto}")
+@router.put("/{id_producto}", dependencies=[Depends(admin_actual)])
 def actualizar(id_producto: int, datos: ProductoEntrada):
     _buscar_o_404(id_producto)
     return {"ok": True, "data": producto_service.actualizar(id_producto, datos)}
 
 
-@router.delete("/{id_producto}")
+@router.delete("/{id_producto}", dependencies=[Depends(admin_actual)])
 def eliminar(id_producto: int):
     _buscar_o_404(id_producto)
     producto_service.eliminar(id_producto)

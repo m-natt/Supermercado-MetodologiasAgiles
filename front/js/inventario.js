@@ -57,7 +57,7 @@ function guardarUmbral(valor) {
 async function pedirJson(ruta, opciones = {}) {
   let respuesta;
   try {
-    respuesta = await fetch(`${API_BASE}${ruta}`, opciones);
+    respuesta = await fetch(`${API_BASE}${ruta}`, { ...opciones, headers: Sesion.cabeceras(opciones.headers) });
   } catch {
     throw new Error("No hay conexión con el servidor. ¿Está encendido el backend?");
   }

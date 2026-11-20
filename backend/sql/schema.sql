@@ -19,6 +19,7 @@ CREATE TABLE clientes (
   correo VARCHAR(150) NOT NULL UNIQUE,
   telefono VARCHAR(20),
   contrasena VARCHAR(255) NOT NULL, -- hash Argon2 (pwdlib); "!" = cliente invitado sin contraseña
+  rol VARCHAR(20) NOT NULL DEFAULT 'cliente',
   fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
