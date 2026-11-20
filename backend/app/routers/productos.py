@@ -1,7 +1,9 @@
 from decimal import Decimal
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import Depends, APIRouter, HTTPException, Query
+
+from app.dependencias import admin_actual
 
 from app.schemas.producto import ProductoEntrada
 from app.services import producto_service
