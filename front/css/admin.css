@@ -1,0 +1,94 @@
+/* =====================================================
+   admin.css — Panel de administración.
+   Se carga DESPUÉS de styles.css, diseno.css, checkout.css
+   e inventario.css y reutiliza sus variables y clases inv-*.
+   ===================================================== */
+
+/* ---------- Acceso restringido ---------- */
+.adm-gate { max-width: 460px; margin: 40px auto; text-align: center; }
+.adm-gate[hidden] { display: none; }
+.adm-gate h2 { margin: 0 0 8px; }
+.adm-gate p { margin: 0 0 20px; color: var(--muted); }
+.adm-gate .primary-button { display: inline-block; text-decoration: none; }
+
+#adm-app[hidden] { display: none; }
+[data-panel][hidden] { display: none; }
+
+/* ---------- Pestañas ---------- */
+.adm-tabs {
+  display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; padding-bottom: 10px;
+  border-bottom: 2px solid var(--line);
+}
+.adm-tab {
+  padding: 9px 16px; border: 1px solid transparent; border-radius: 999px; background: transparent;
+  color: var(--muted); font: inherit; font-size: 14px; font-weight: 750; cursor: pointer; white-space: nowrap;
+}
+.adm-tab:hover { background: var(--green-soft); color: var(--green); }
+.adm-tab[aria-selected="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+a.adm-tab { margin-left: auto; border-color: var(--line); color: var(--green); }
+.adm-tab:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* ---------- Resumen ---------- */
+.adm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 16px; }
+.adm-grid .panel, #tab-resumen > .panel { margin: 0 0 16px; }
+.adm-grid h2, #tab-resumen > .panel h2 { margin: 0 0 12px; font-size: 18px; }
+.adm-list { margin: 0; padding: 0; list-style: none; }
+.adm-list li {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 15px;
+}
+.adm-list li:last-child { border-bottom: 0; }
+
+/* ---------- Barra de herramientas ---------- */
+.adm-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; margin: 0 0 16px; }
+.adm-toolbar .primary-button { white-space: nowrap; }
+
+/* ---------- Selects dentro de la tabla ---------- */
+.adm-select {
+  padding: 7px 10px; border: 1px solid #d6e7dc; border-radius: 8px; background: #fff;
+  color: var(--ink); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.adm-select:disabled { background: #f4f6f4; color: var(--muted); cursor: not-allowed; }
+.adm-select:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* ---------- Etiquetas de estado ---------- */
+.adm-badge--confirmado { background: #e7f0fb; color: #1d4f8a; }
+.adm-badge--preparando { background: #fff1d6; color: #8a5300; }
+.adm-badge--en_camino { background: #efe8fb; color: #5b3596; }
+.adm-badge--entregado { background: #e6f4ea; color: #1e6b3a; }
+.adm-badge--cancelado { background: #fdecea; color: #a12a1f; }
+.adm-badge--activo { background: #e6f4ea; color: #1e6b3a; }
+.adm-badge--inactivo { background: #eef0ee; color: #5d6862; }
+
+/* ---------- Diálogo de producto ---------- */
+.adm-dialog {
+  width: min(620px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 24px;
+  border: 1px solid var(--line); border-radius: 16px; background: #fff; color: var(--ink);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .18);
+}
+.adm-dialog::backdrop { background: rgba(20, 30, 25, .45); }
+.adm-dialog h2 { margin: 0 0 16px; font-size: 22px; }
+.adm-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.adm-full { grid-column: 1 / -1; }
+.adm-form .inv-field input,
+.adm-form .inv-field select { width: 100%; min-width: 0; }
+.adm-form textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid #d6e7dc; border-radius: 9px; resize: vertical;
+  background: #fff; color: var(--ink); font: inherit; font-size: 14px; font-weight: 500; letter-spacing: 0; text-transform: none;
+}
+.adm-form textarea:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.adm-form input[type="checkbox"] { width: auto; min-width: 0; margin: 0 6px 0 0; padding: 0; vertical-align: middle; }
+.adm-form .inv-message { margin: 0; }
+.adm-form-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 760px) {
+  .adm-grid { grid-template-columns: 1fr; }
+  a.adm-tab { margin-left: 0; }
+}
+@media (max-width: 520px) {
+  .adm-form { grid-template-columns: 1fr; }
+  .adm-toolbar .primary-button { width: 100%; }
+  .adm-form-actions { flex-direction: column-reverse; }
+  .adm-form-actions button { width: 100%; }
+}

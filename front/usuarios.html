@@ -145,6 +145,8 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #6259
    <span id="clientPhone"></span>
   </div>
   <div class="client-actions">
+   <!-- Solo visible para cuentas con rol "administrador" -->
+   <a id="adminLink" class="primary hidden" href="admin.html">🛠️ Panel de administración</a>
    <a class="primary" href="index.html#catalogo">Ir a comprar</a>
    <a class="secondary" href="historial.html">Mis pedidos</a>
    <a class="secondary" href="checkout.html">Ver mi carrito</a>
@@ -162,7 +164,6 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #6259
   <button id="rolesButton" onclick="showPage('roles')">Roles y permisos</button>
   <button onclick="location.href='inventario.html'">Inventario</button>
   <button onclick="location.href='admin.html'">Panel de administración</button>
-  <button onclick="location.href='inventario.html'">Inventario</button>
   <button onclick="logout()">Cerrar sesión</button>
  </aside>
 
@@ -348,6 +349,7 @@ function showClient(cliente){
  $("clientName").textContent=[cliente.nombre,cliente.apellidos].filter(Boolean).join(" ");
  $("clientEmail").textContent="✉️ "+cliente.correo;
  $("clientPhone").textContent=cliente.telefono?"📞 "+cliente.telefono:"";
+ $("adminLink").classList.toggle("hidden",cliente.rol!=="administrador");
  showAuth("client");
 }
 
