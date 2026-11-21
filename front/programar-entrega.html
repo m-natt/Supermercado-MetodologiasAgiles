@@ -4,15 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Supermercado Bonito :3 | Programar entrega</title>
-  <link rel="stylesheet" href="css/styles.css?v=2026111802">
-  <link rel="stylesheet" href="css/diseno.css?v=2026111802">
-  <link rel="stylesheet" href="css/checkout.css?v=2026111802">
-  <script src="js/config.js?v=2026111802" defer></script>
-  <script src="js/carrito.js?v=2026111802" defer></script>
-  <script src="js/sesion.js?v=2026111802" defer></script>
+  <link rel="stylesheet" href="css/styles.css?v=2026112101">
+  <link rel="stylesheet" href="css/diseno.css?v=2026112101">
+  <link rel="stylesheet" href="css/checkout.css?v=2026112101">
+  <script src="js/config.js?v=2026112101" defer></script>
+  <script src="js/carrito.js?v=2026112101" defer></script>
+  <script src="js/sesion.js?v=2026112101" defer></script>
+  <script src="js/programar-entrega.js?v=2026112101" defer></script>
 
-  <!-- Estilos propios de esta página (para no tocar los demás archivos) -->
+  <!-- Estilos propios de esta página -->
   <style>
+    .note { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+    .ok-msg { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; background: #e6f4ea; color: #1e6b3a; font-size: 14px; font-weight: 700; }
+    .ok-msg[hidden], .note[hidden], .panel[hidden] { display: none; }
+
     .field select,
     .field input[type="date"],
     .field input[type="text"] {
@@ -21,10 +26,12 @@
       color: var(--ink); font: inherit; font-weight: 500;
     }
     .field select:focus-visible,
-    .field input[type="date"]:focus-visible,
-    .field input[type="text"]:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; border-color: transparent; }
+    .field input[type="date"]:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; border-color: transparent; }
 
-    .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; border: 0; margin: 0; padding: 0; }
+    .pedido-actual { margin: 0 0 16px; padding: 12px 14px; border-radius: 12px; background: var(--green-soft); color: var(--green-dark); font-size: 14px; }
+    .pedido-actual strong { display: block; font-size: 15px; margin-bottom: 2px; }
+
+    .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; border: 0; margin: 16px 0 0; padding: 0; }
     .slots legend { padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: var(--ink); }
     .slot { position: relative; }
     .slot input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
@@ -44,9 +51,9 @@
     }
     .programada strong { display: block; font-size: 15px; }
     .programada small { color: var(--muted); font-size: 13px; }
-    .programada--pasada { opacity: .6; }
-    .resumen { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--green-soft); color: var(--green-dark); font-size: 14px; font-weight: 700; }
-    .resumen[hidden] { display: none; }
+    .programada--actual { border-color: var(--green); }
+    .vacio-acciones { display: flex; flex-wrap: wrap; gap: 10px; }
+    .vacio-acciones [hidden], .field[hidden] { display: none; }
     @media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -61,265 +68,54 @@
   </header>
 
   <main class="container checkout-page">
-    <a href="index.html" class="back-link">← Seguir comprando</a>
+    <a href="historial.html" class="back-link" id="back-link">← Mis pedidos</a>
     <h1 class="page-title">Programar entrega</h1>
-    <p class="note" id="pedido-info"></p>
+    <p class="note" id="estado-carga">Cargando tus pedidos…</p>
 
-    <section class="panel" aria-labelledby="prog-title">
-      <h2 id="prog-title">Elige cuándo quieres recibir tu producto</h2>
+    <!-- Sin pedidos que se puedan programar -->
+    <section class="panel" id="sin-pedidos" hidden>
+      <h2>No hay pedidos para programar</h2>
+      <p class="note" id="sin-pedidos-texto"></p>
+      <div class="vacio-acciones">
+        <a href="index.html#catalogo" class="primary-button">Ir al catálogo</a>
+        <a href="usuarios.html" class="secondary-button" id="sin-pedidos-login">Iniciar sesión</a>
+      </div>
+    </section>
+
+    <section class="panel" id="formulario" aria-labelledby="prog-title" hidden>
+      <h2 id="prog-title">Elige cuándo quieres recibir tu pedido</h2>
       <form id="form" novalidate>
         <div class="field-grid">
-          <label class="field field--wide" id="producto-select-box"><span>Producto *</span>
-            <select id="producto"></select></label>
-          <label class="field field--wide" id="producto-texto-box" hidden><span>Producto *</span>
-            <input type="text" id="producto-texto" maxlength="100" placeholder="Nombre del producto"></label>
+          <label class="field field--wide" id="pedido-box"><span>Pedido *</span>
+            <select id="pedido"></select></label>
+        </div>
+        <div class="pedido-actual" id="pedido-actual"></div>
 
+        <div class="field-grid">
           <label class="field"><span>Fecha de entrega *</span>
             <input type="date" id="fecha"></label>
           <label class="field"><span>Falta para la entrega</span>
             <input type="text" id="anticipacion" readonly value="—"></label>
         </div>
 
-        <fieldset class="slots" id="slots" style="margin-top:16px">
+        <fieldset class="slots" id="slots">
           <legend>Horario de entrega *</legend>
         </fieldset>
         <p class="note" id="slots-nota" style="margin-top:8px"></p>
 
         <p id="error" class="form-error" role="alert" hidden></p>
         <p id="okmsg" class="ok-msg" role="status" hidden></p>
-        <button type="submit" class="primary-button">Programar entrega</button>
+        <button type="submit" class="primary-button" id="guardar">Programar entrega</button>
       </form>
-      <div id="resumen" class="resumen" hidden></div>
     </section>
 
-    <section class="panel" aria-labelledby="lista-title">
-      <h2 id="lista-title">Entregas programadas</h2>
-      <p class="note">Se guardan en este navegador. Puedes programar hasta 14 días hacia adelante, con al menos 1 hora de anticipación.</p>
+    <section class="panel" id="lista-panel" aria-labelledby="lista-title" hidden>
+      <h2 id="lista-title">Tus próximas entregas</h2>
+      <p class="note">Puedes cambiar la entrega mientras el pedido esté confirmado o en preparación (hasta 14 días adelante, con al menos 1 hora de anticipación).</p>
       <ul id="lista" class="programadas"></ul>
-      <p id="vacio" class="note" hidden>Aún no tienes entregas programadas.</p>
     </section>
   </main>
 
   <footer class="pie">© <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados</footer>
-
-  <script>
-    // Programar fecha y hora de entrega de un producto.
-    // Solo usa config.js (makeText) y los estilos que ya existen; no toca ningún otro archivo.
-    // Las entregas programadas se guardan en localStorage del navegador.
-    (() => {
-      const ULTIMO_PEDIDO_KEY = "supermercado_ultimo_pedido";
-      const ENTREGAS_KEY = "supermercado_entregas_programadas";
-      const DIAS_MAX = 14;                 // hasta cuántos días adelante se puede programar
-      const ANTICIPACION_MIN_HORAS = 1;    // anticipación mínima respecto a la hora de inicio del horario
-      const HORARIOS = [                   // franjas de 2 horas, de 8:00 a 20:00
-        [8, 10], [10, 12], [12, 14], [14, 16], [16, 18], [18, 20],
-      ];
-
-      const $ = id => document.getElementById(id);
-      const dos = n => String(n).padStart(2, "0");
-      const hora = h => `${dos(h)}:00`;
-      const aISO = d => `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
-      const deISO = iso => {                // "2026-11-20" -> Date local a medianoche
-        const [y, m, d] = iso.split("-").map(Number);
-        return new Date(y, m - 1, d);
-      };
-      const bonita = iso => new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", month: "long" }).format(deISO(iso));
-      const etiquetaHorario = ([a, b]) => `${hora(a)} – ${hora(b)}`;
-
-      // ---------- Almacenamiento ----------
-      function leerEntregas() {
-        try {
-          const lista = JSON.parse(localStorage.getItem(ENTREGAS_KEY) || "[]");
-          return Array.isArray(lista) ? lista : [];
-        } catch { return []; }
-      }
-      function guardarEntregas(lista) {
-        try { localStorage.setItem(ENTREGAS_KEY, JSON.stringify(lista)); return true; }
-        catch { return false; }
-      }
-
-      // ---------- Pedido (si se llega desde la confirmación) ----------
-      function leerPedido() {
-        try {
-          const p = JSON.parse(sessionStorage.getItem(ULTIMO_PEDIDO_KEY) || "null");
-          const id = new URLSearchParams(location.search).get("pedido");
-          if (!p || !Array.isArray(p.items) || !p.items.length) return null;
-          return id && String(p.id_pedido) !== id ? null : p;
-        } catch { return null; }
-      }
-      const pedido = leerPedido();
-
-      // ---------- Producto ----------
-      function pintarProductos() {
-        if (pedido) {
-          $("pedido-info").textContent = `Pedido #${String(pedido.id_pedido).padStart(6, "0")}: elige el producto que quieres programar.`;
-          $("producto").replaceChildren(...pedido.items.map(it => {
-            const o = document.createElement("option");
-            o.value = String(it.id_producto);
-            o.textContent = it.nombre || `Producto ${it.id_producto}`;
-            return o;
-          }));
-        } else {
-          $("pedido-info").textContent = "Escribe el producto que quieres recibir y elige el día y la hora.";
-          $("producto-select-box").hidden = true;
-          $("producto-texto-box").hidden = false;
-        }
-      }
-      function productoElegido() {
-        if (pedido) {
-          const op = $("producto").selectedOptions[0];
-          return op ? { id_producto: Number(op.value), nombre: op.textContent } : null;
-        }
-        const nombre = $("producto-texto").value.trim();
-        return nombre ? { id_producto: null, nombre } : null;
-      }
-
-      // ---------- Fecha y horarios ----------
-      function limitesFecha() {
-        const hoy = new Date();
-        const max = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + DIAS_MAX);
-        $("fecha").min = aISO(hoy);
-        $("fecha").max = aISO(max);
-      }
-
-      // Un horario está disponible si su hora de inicio queda al menos 1 h en el futuro
-      function horarioDisponible(iso, [inicio]) {
-        const d = deISO(iso);
-        d.setHours(inicio, 0, 0, 0);
-        return d.getTime() - Date.now() >= ANTICIPACION_MIN_HORAS * 3600 * 1000;
-      }
-
-      function pintarHorarios() {
-        const iso = $("fecha").value;
-        const previo = document.querySelector('input[name="horario"]:checked')?.value;
-        const cont = $("slots");
-        cont.querySelectorAll(".slot").forEach(n => n.remove());
-
-        let disponibles = 0;
-        HORARIOS.forEach(h => {
-          const valor = `${h[0]}-${h[1]}`;
-          const label = document.createElement("label");
-          label.className = "slot";
-          const radio = document.createElement("input");
-          radio.type = "radio"; radio.name = "horario"; radio.value = valor;
-          const ok = iso ? horarioDisponible(iso, h) : false;
-          radio.disabled = !ok;
-          radio.checked = ok && valor === previo;
-          if (ok) disponibles++;
-          label.append(radio, makeText("span", "", etiquetaHorario(h)));
-          cont.append(label);
-        });
-
-        if (!iso) $("slots-nota").textContent = "Primero elige una fecha para ver los horarios.";
-        else if (!disponibles) $("slots-nota").textContent = "Ya no hay horarios disponibles ese día. Prueba con otra fecha.";
-        else $("slots-nota").textContent = "Los horarios tachados ya no están disponibles.";
-
-        if (iso) {
-          const dias = Math.round((deISO(iso) - deISO(aISO(new Date()))) / 86400000);
-          $("anticipacion").value = dias === 0 ? "Hoy" : dias === 1 ? "Mañana" : `En ${dias} días`;
-        } else {
-          $("anticipacion").value = "—";
-        }
-      }
-
-      // ---------- Mensajes ----------
-      function mostrarError(texto) {
-        $("error").textContent = texto;
-        $("error").hidden = !texto;
-        if (texto) { $("okmsg").hidden = true; $("resumen").hidden = true; }
-      }
-
-      // ---------- Lista ----------
-      function finDeEntrega(e) {
-        const d = deISO(e.fecha);
-        d.setHours(Number(e.horario.split("-")[1]), 0, 0, 0);
-        return d.getTime();
-      }
-
-      function pintarLista() {
-        const lista = leerEntregas().sort((a, b) =>
-          a.fecha.localeCompare(b.fecha) || Number(a.horario.split("-")[0]) - Number(b.horario.split("-")[0]));
-        $("vacio").hidden = lista.length > 0;
-        $("lista").replaceChildren(...lista.map(e => {
-          const li = document.createElement("li");
-          const pasada = finDeEntrega(e) < Date.now();
-          li.className = "programada" + (pasada ? " programada--pasada" : "");
-
-          const [a, b] = e.horario.split("-").map(Number);
-          const texto = document.createElement("div");
-          texto.append(
-            makeText("strong", "", e.producto),
-            makeText("small", "",
-              `📅 ${bonita(e.fecha)} · 🕒 ${etiquetaHorario([a, b])}` +
-              (e.id_pedido ? ` · Pedido #${String(e.id_pedido).padStart(6, "0")}` : "") +
-              (pasada ? " · Ya pasó" : ""))
-          );
-
-          const quitar = makeText("button", "secondary-button", "Cancelar");
-          quitar.type = "button";
-          quitar.setAttribute("aria-label", `Cancelar entrega programada de ${e.producto}`);
-          quitar.addEventListener("click", () => {
-            if (!confirm("¿Cancelar esta entrega programada?")) return;
-            guardarEntregas(leerEntregas().filter(x => x.id !== e.id));
-            pintarLista();
-          });
-
-          li.append(texto, quitar);
-          return li;
-        }));
-      }
-
-      // ---------- Envío del formulario ----------
-      $("fecha").addEventListener("change", () => { mostrarError(""); pintarHorarios(); });
-      $("form").addEventListener("submit", ev => {
-        ev.preventDefault();
-
-        const producto = productoElegido();
-        if (!producto) return mostrarError("Elige o escribe el producto a entregar.");
-
-        const iso = $("fecha").value;
-        if (!iso) return mostrarError("Elige la fecha de entrega.");
-        if (iso < $("fecha").min) return mostrarError("La fecha no puede ser anterior a hoy.");
-        if (iso > $("fecha").max) return mostrarError(`Solo puedes programar hasta ${DIAS_MAX} días hacia adelante.`);
-
-        const valor = document.querySelector('input[name="horario"]:checked')?.value;
-        if (!valor) return mostrarError("Elige un horario de entrega.");
-        const franja = valor.split("-").map(Number);
-        if (!horarioDisponible(iso, franja)) {
-          pintarHorarios();
-          return mostrarError("Ese horario ya no está disponible. Elige otro.");
-        }
-
-        // Un mismo producto del mismo pedido solo tiene una entrega programada: se reemplaza
-        const idPedido = pedido ? pedido.id_pedido : null;
-        const lista = leerEntregas().filter(x =>
-          !(x.id_pedido === idPedido && x.producto === producto.nombre));
-        lista.push({
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-          id_pedido: idPedido,
-          id_producto: producto.id_producto,
-          producto: producto.nombre,
-          fecha: iso,
-          horario: valor,
-          creada: new Date().toISOString(),
-        });
-        if (!guardarEntregas(lista)) return mostrarError("No pudimos guardar la entrega (¿navegación privada?).");
-
-        mostrarError("");
-        $("okmsg").textContent = "✓ Entrega programada.";
-        $("okmsg").hidden = false;
-        $("resumen").textContent = `${producto.nombre}: ${bonita(iso)}, de ${etiquetaHorario(franja)}.`;
-        $("resumen").hidden = false;
-        $("fecha").value = "";
-        pintarHorarios();
-        pintarLista();
-      });
-
-      pintarProductos();
-      limitesFecha();
-      pintarHorarios();
-      pintarLista();
-    })();
-  </script>
 </body>
 </html>

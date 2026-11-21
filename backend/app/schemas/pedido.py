@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -66,3 +67,10 @@ class PagoTarjetaEntrada(Entrada):
     ultimos4: str = Field(pattern=r"^\d{4}$")
     vence: str = Field(pattern=r"^(0[1-9]|1[0-2])/\d{2}$")
     marca: str = Field(default="TARJETA", max_length=20)
+
+
+class EntregaEntrada(Entrada):
+    """Fecha y franja de 2 horas en que el cliente quiere recibir su pedido."""
+    fecha: date
+    # Hora en que empieza la franja (8 = de 8:00 a 10:00). pedido_service valida cuáles se aceptan.
+    hora_inicio: int = Field(ge=0, le=23)

@@ -129,6 +129,7 @@ function showOrder(order) {
     ? `${formatDate(order.fecha_entrega)}, a las ${formatTime(order.fecha_entrega)}` +
       (order.tiempo_estimado_min ? ` (en unos ${order.tiempo_estimado_min} min)` : "")
     : "Por confirmar";
+  $("confirm-schedule").href = `programar-entrega.html?pedido=${encodeURIComponent(order.id_pedido)}`;
   const address = $("confirm-address");
   address.replaceChildren(
     makeText("span", "", d.calle),

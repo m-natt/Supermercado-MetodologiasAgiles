@@ -248,7 +248,7 @@ async function cargarPedidos() {
   const estado = $("ped-filter").value;
   const pedidos = await api(`/api/admin/pedidos${estado ? `?estado=${estado}` : ""}`);
   const cuerpo = $("ped-body");
-  if (!pedidos.length) return vaciar(cuerpo, 5, "No hay pedidos con ese filtro.");
+  if (!pedidos.length) return vaciar(cuerpo, 6, "No hay pedidos con ese filtro.");
   cuerpo.replaceChildren(...pedidos.map(p => {
     const sel = selector(Object.keys(ETIQUETA), p.estado, ETIQUETA);
     sel.disabled = ESTADOS_FINALES.includes(p.estado);
@@ -259,6 +259,7 @@ async function cargarPedidos() {
       celda(textoDoble(p.cliente, p.correo)),
       celda(money(p.total), "inv-num"),
       celda(p.metodo ? `${p.metodo} (${p.estado_pago})` : "—"),
+      celda(fecha(p.fecha_entrega)),
       celda(sel),
     );
     return fila;

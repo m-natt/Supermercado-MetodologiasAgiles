@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from decimal import Decimal
 
 from app.database import transaccion
@@ -269,4 +269,55 @@ def pagar_con_tarjeta(id_pedido, datos, cliente_sesion=None):
         "monto": fila["monto"],
         "folio": f"SIM-{fila['id_pago']:06d}",
         "tarjeta": f"{datos.marca} •••• {datos.ultimos4}",
+    }
+
+
+# ---------- Programar la entrega ----------
+# Franjas de 2 horas entre las 8:00 y las 20:00 (se guarda la hora de inicio).
+# (front/programar-entrega.html muestra las mismas reglas; si cambian aquí, cámbialas allá)
+HORAS_ENTREGA = (8, 10, 12, 14, 16, 18)
+DURACION_FRANJA_HORAS = 2
+DIAS_MAX_PROGRAMAR = 14
+ANTICIPACION_MIN = timedelta(hours=1)
+# Cuando el pedido ya va en camino (o terminó) ya no se puede reprogramar
+ESTADOS_PROGRAMABLES = ("confirmado", "preparando")
+
+
+def programar_entrega(id_pedido, datos, cliente_sesion=None):
+    """Cambia pedidos.fecha_entrega por la fecha y franja que eligió el cliente."""
+    if datos.hora_inicio not in HORAS_ENTREGA:
+        raise PedidoInvalido("Ese horario no existe. Elige una franja entre las 8:00 y las 20:00.")
+
+    ahora = datetime.now().replace(microsecond=0)
+    inicio = datetime.combine(datos.fecha, time(hour=datos.hora_inicio))
+    if datos.fecha > ahora.date() + timedelta(days=DIAS_MAX_PROGRAMAR):
+        raise PedidoInvalido(f"Solo puedes programar hasta {DIAS_MAX_PROGRAMAR} días hacia adelante.")
+    if inicio - ahora < ANTICIPACION_MIN:
+        raise PedidoInvalido("Ese horario ya no está disponible: se necesita al menos 1 hora de anticipación.")
+
+    with transaccion() as cursor:
+        cursor.execute(
+            """SELECT p.id_cliente, p.estado, c.contrasena
+               FROM pedidos p
+               JOIN clientes c ON c.id_cliente = p.id_cliente
+               WHERE p.id_pedido = %s
+               FOR UPDATE""",
+            (id_pedido,),
+        )
+        fila = cursor.fetchone()
+        if fila is None:
+            raise PedidoNoEncontrado()
+        # Igual que el pago: el pedido de una cuenta registrada solo lo cambia su dueño
+        es_de_cuenta = fila["contrasena"] != CONTRASENA_INVITADO
+        if es_de_cuenta and (not cliente_sesion or cliente_sesion["id_cliente"] != fila["id_cliente"]):
+            raise PedidoNoEncontrado()
+        if fila["estado"] not in ESTADOS_PROGRAMABLES:
+            estado = fila["estado"].replace("_", " ")
+            raise PedidoInvalido(f"El pedido ya está {estado}; ya no se puede cambiar la entrega.")
+        cursor.execute("UPDATE pedidos SET fecha_entrega = %s WHERE id_pedido = %s", (inicio, id_pedido))
+
+    return {
+        "id_pedido": id_pedido,
+        "fecha_entrega": inicio,
+        "fin_franja": inicio + timedelta(hours=DURACION_FRANJA_HORAS),
     }

@@ -177,6 +177,12 @@ function tarjetaPedido(pedido) {
     factura.href = `factura.html?pedido=${encodeURIComponent(pedido.id_pedido)}`;
     acciones.append(factura);
   }
+  // Entrega: se puede reprogramar mientras el pedido no haya salido
+  if (["confirmado", "preparando"].includes(pedido.estado)) {
+    const entrega = makeText("a", "secondary-button hist-order__button", "📅 Programar entrega");
+    entrega.href = `programar-entrega.html?pedido=${encodeURIComponent(pedido.id_pedido)}`;
+    acciones.append(entrega);
+  }
   acciones.append(boton);
 
   pie.append(totales, acciones);
