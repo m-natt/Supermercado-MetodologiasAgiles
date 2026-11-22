@@ -60,3 +60,15 @@
   .freq-list { grid-template-columns: 1fr; }
   .hist-message { top: 84px; }
 }
+
+
+/* ---------- Notificaciones de estado del pedido ---------- */
+.notifications-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.notification-item {
+  display: grid; gap: 4px; padding: 13px 15px;
+  border: 1px solid var(--line); border-radius: 12px; background: #fff;
+}
+.notification-item__title { font-size: 14px; }
+.notification-item__message { font-size: 14px; }
+.notification-item__date { color: var(--muted); font-size: 12px; }
+
