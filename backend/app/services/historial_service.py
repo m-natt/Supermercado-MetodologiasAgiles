@@ -26,6 +26,7 @@ def pedidos_del_cliente(id_cliente, limite=20):
     """Los pedidos más recientes del cliente, cada uno con sus productos."""
     pedidos = consultar(
         """SELECT p.id_pedido, p.fecha, p.estado, p.total, p.costo_envio, p.fecha_entrega,
+                  p.modalidad_entrega, p.sucursal_recoleccion,
                   (SELECT pg.metodo FROM pagos pg
                    WHERE pg.id_pedido = p.id_pedido
                    ORDER BY pg.id_pago DESC LIMIT 1) AS metodo_pago,
@@ -79,6 +80,8 @@ def pedidos_del_cliente(id_cliente, limite=20):
             "pago_estado": p["pago_estado"],
             "id_factura": p["id_factura"],  # None si todavía no tiene factura
             "fecha_entrega": p["fecha_entrega"],
+            "modalidad_entrega": p["modalidad_entrega"],
+            "sucursal_recoleccion": p["sucursal_recoleccion"],
             "costo_envio": p["costo_envio"],
             "total": p["total"],
             "unidades": sum(i["cantidad"] for i in items),
