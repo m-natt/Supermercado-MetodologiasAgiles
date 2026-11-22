@@ -114,6 +114,7 @@ function itemRow(item) {
 function showOrder(order) {
   const cliente = order.cliente || {};
   const d = order.direccion || {};
+  const esRecoleccion = order.modalidad_entrega === "recoleccion_tienda";
   const metodo = METODOS[order.metodo_pago] || { nombre: order.metodo_pago, ayuda: "" };
 
   document.title = `Pedido ${orderNumber(order.id_pedido)} | Supermercado Bonito :3`;
@@ -125,10 +126,18 @@ function showOrder(order) {
     "Guarda tu número de pedido para cualquier aclaración.";
   $("confirm-number").textContent = orderNumber(order.id_pedido);
 
-  $("confirm-delivery").textContent = order.fecha_entrega
-    ? `${formatDate(order.fecha_entrega)}, a las ${formatTime(order.fecha_entrega)}` +
-      (order.tiempo_estimado_min ? ` (en unos ${order.tiempo_estimado_min} min)` : "")
-    : "Por confirmar";
+  $("confirm-delivery").textContent = esRecoleccion
+    ? "Tu pedido estará disponible para recoger cuando cambie a «Listo para recoger»."
+    : order.fecha_entrega
+      ? `${formatDate(order.fecha_entrega)}, a las ${formatTime(order.fecha_entrega)}` +
+        (order.tiempo_estimado_min ? ` (en unos ${order.tiempo_estimado_min} min)` : "")
+      : "Por confirmar";
+  $("confirm-home-delivery").hidden = esRecoleccion;
+  $("confirm-pickup").hidden = !esRecoleccion;
+  $("confirm-pickup").textContent = esRecoleccion
+    ? `Sucursal: ${order.sucursal_recoleccion || "Sucursal principal"}. Revisa las notificaciones de tu cuenta antes de acudir.`
+    : "";
+  $("confirm-schedule").hidden = esRecoleccion;
   $("confirm-schedule").href = `programar-entrega.html?pedido=${encodeURIComponent(order.id_pedido)}`;
   const address = $("confirm-address");
   address.replaceChildren(
