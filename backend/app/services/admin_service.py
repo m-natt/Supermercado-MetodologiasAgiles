@@ -2,7 +2,7 @@ from app.database import consultar, transaccion
 from app.services.inventario_service import UMBRAL_DEFECTO
 
 ROLES = ("cliente", "administrador")
-ESTADOS_PEDIDO = ("confirmado", "preparando", "en_camino", "entregado", "cancelado")
+ESTADOS_PEDIDO = ("confirmado", "preparando", "en_camino", "listo_para_recoger", "entregado", "cancelado")
 ESTADOS_FINALES = ("entregado", "cancelado")
 
 
@@ -48,6 +48,7 @@ def resumen():
 
 def listar_pedidos(estado=None, limite=100):
     sql = """SELECT p.id_pedido, p.fecha, p.estado, p.total, p.costo_envio, p.fecha_entrega,
+                    p.modalidad_entrega, p.sucursal_recoleccion,
                     TRIM(CONCAT(c.nombre, ' ', COALESCE(c.apellidos, ''))) AS cliente, c.correo,
                     pa.metodo, pa.estado AS estado_pago
              FROM pedidos p
@@ -64,7 +65,7 @@ def listar_pedidos(estado=None, limite=100):
 
 def cambiar_estado_pedido(id_pedido, nuevo):
     with transaccion() as cursor:
-        cursor.execute("SELECT estado FROM pedidos WHERE id_pedido = %s FOR UPDATE", (id_pedido,))
+        cursor.execute("SELECT id_cliente, estado FROM pedidos WHERE id_pedido = %s FOR UPDATE", (id_pedido,))
         fila = cursor.fetchone()
         if fila is None:
             raise NoEncontrado()
@@ -72,6 +73,21 @@ def cambiar_estado_pedido(id_pedido, nuevo):
         if anterior in ESTADOS_FINALES:
             raise AdminInvalido(f"El pedido ya está {anterior} y no se puede cambiar.")
         cursor.execute("UPDATE pedidos SET estado = %s WHERE id_pedido = %s", (nuevo, id_pedido))
+        if nuevo != anterior:
+            etiquetas = {
+                "confirmado": "fue confirmado",
+                "preparando": "está en preparación",
+                "en_camino": "va en camino",
+                "listo_para_recoger": "está listo para recoger en tienda",
+                "entregado": "fue entregado",
+                "cancelado": "fue cancelado",
+            }
+            mensaje = f"El pedido #{id_pedido} {etiquetas[nuevo]}."
+            cursor.execute(
+                """INSERT INTO notificaciones_pedido (id_cliente, id_pedido, estado, mensaje)
+                   VALUES (%s, %s, %s, %s)""",
+                (fila["id_cliente"], id_pedido, nuevo, mensaje),
+            )
         if nuevo == "cancelado":
             # Al cancelar, la mercancía regresa al inventario
             cursor.execute(
@@ -100,4 +116,5 @@ def cambiar_rol(id_cliente, rol, id_admin):
     if fila is None:
         raise NoEncontrado()
     return fila
+
 
