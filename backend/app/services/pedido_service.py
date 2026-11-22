@@ -105,10 +105,18 @@ def crear(datos, cliente_sesion=None):
         productos = _bloquear_productos(cursor, [item.id_producto for item in datos.items])
         lineas = _armar_lineas(datos.items, productos)
 
+        direccion = None
+        id_direccion = None
+        modalidad = datos.modalidad_entrega
+        sucursal = datos.sucursal_recoleccion if modalidad == "recoleccion_tienda" else None
+
         if cliente_sesion:
             id_cliente = cliente_sesion["id_cliente"]
+        else:
+            id_cliente = _obtener_o_crear_cliente(cursor, datos.cliente)
 
-            if datos.id_direccion is not None:
+        if modalidad == "domicilio":
+            if cliente_sesion and datos.id_direccion is not None:
                 cursor.execute(
                     """SELECT id_direccion, calle, colonia, ciudad, codigo_postal, referencias
                        FROM direcciones
@@ -121,6 +129,8 @@ def crear(datos, cliente_sesion=None):
                 id_direccion = direccion["id_direccion"]
             else:
                 d = datos.direccion
+                if d is None:
+                    raise PedidoInvalido("Debes capturar una dirección de entrega.")
                 cursor.execute(
                     """INSERT INTO direcciones
                        (id_cliente, calle, colonia, ciudad, codigo_postal, referencias)
@@ -136,42 +146,35 @@ def crear(datos, cliente_sesion=None):
                     "codigo_postal": d.codigo_postal,
                     "referencias": d.referencias,
                 }
-        else:
-            # Los invitados no pueden usar direcciones guardadas.
-            if datos.id_direccion is not None:
-                raise PedidoInvalido("Inicia sesión para usar una dirección guardada.")
-            id_cliente = _obtener_o_crear_cliente(cursor, datos.cliente)
-            d = datos.direccion
-            cursor.execute(
-                """INSERT INTO direcciones
-                   (id_cliente, calle, colonia, ciudad, codigo_postal, referencias)
-                   VALUES (%s, %s, %s, %s, %s, %s)""",
-                (id_cliente, d.calle, d.colonia, d.ciudad, d.codigo_postal, d.referencias),
+            zona = _zona_de_entrega(cursor, direccion["codigo_postal"])
+            costo_envio = calcular_envio(
+                sum((linea["subtotal"] for linea in lineas), Decimal("0.00")),
+                zona["costo_envio"],
             )
-            id_direccion = cursor.lastrowid
-            direccion = {
-                "id_direccion": id_direccion,
-                "calle": d.calle,
-                "colonia": d.colonia,
-                "ciudad": d.ciudad,
-                "codigo_postal": d.codigo_postal,
-                "referencias": d.referencias,
-            }
+            minutos = zona["tiempo_estimado_min"]
+        else:
+            zona = None
+            costo_envio = Decimal("0.00")
+            minutos = None
 
-        zona = _zona_de_entrega(cursor, direccion["codigo_postal"])
         subtotal = sum((linea["subtotal"] for linea in lineas), Decimal("0.00"))
-        costo_envio = calcular_envio(subtotal, zona["costo_envio"])
         total = subtotal + costo_envio
 
         fecha = datetime.now().replace(microsecond=0)
-        minutos = zona["tiempo_estimado_min"]
         fecha_entrega = fecha + timedelta(minutes=minutos) if minutos else None  # None = por confirmar
         cursor.execute(
-            """INSERT INTO pedidos (id_cliente, id_direccion, fecha, estado, total, costo_envio, fecha_entrega)
-               VALUES (%s, %s, %s, 'confirmado', %s, %s, %s)""",
-            (id_cliente, id_direccion, fecha, total, costo_envio, fecha_entrega),
+            """INSERT INTO pedidos
+               (id_cliente, id_direccion, fecha, estado, total, costo_envio, fecha_entrega,
+                modalidad_entrega, sucursal_recoleccion)
+               VALUES (%s, %s, %s, 'confirmado', %s, %s, %s, %s, %s)""",
+            (id_cliente, id_direccion, fecha, total, costo_envio, fecha_entrega, modalidad, sucursal),
         )
         id_pedido = cursor.lastrowid
+        cursor.execute(
+            """INSERT INTO notificaciones_pedido (id_cliente, id_pedido, estado, mensaje)
+               VALUES (%s, %s, 'confirmado', %s)""",
+            (id_cliente, id_pedido, f"Tu pedido #{id_pedido} fue confirmado."),
+        )
 
         cursor.executemany(
             """INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario)
@@ -191,6 +194,8 @@ def crear(datos, cliente_sesion=None):
     return {
         "id_pedido": id_pedido,
         "estado": "confirmado",
+        "modalidad_entrega": modalidad,
+        "sucursal_recoleccion": sucursal,
         "fecha": fecha,
         "fecha_entrega": fecha_entrega,
         "tiempo_estimado_min": minutos,
@@ -201,13 +206,13 @@ def crear(datos, cliente_sesion=None):
             # Con sesión, el pedido es de la cuenta aunque se escriba otro correo
             "correo": cliente_sesion["correo"] if cliente_sesion else datos.cliente.correo,
         },
-        "direccion": {
+        "direccion": ({
             "calle": direccion["calle"],
             "colonia": direccion["colonia"],
             "ciudad": direccion["ciudad"],
             "codigo_postal": direccion["codigo_postal"],
             "referencias": direccion["referencias"],
-        },
+        } if direccion else None),
         "items": lineas,
         "subtotal": subtotal,
         "costo_envio": costo_envio,
