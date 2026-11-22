@@ -11,6 +11,9 @@ const freqCount = byId("freq-count");
 const ordersStatus = byId("orders-status");
 const ordersList = byId("orders-list");
 const ordersCount = byId("orders-count");
+const notificationsStatus = byId("notifications-status");
+const notificationsList = byId("notifications-list");
+const notificationsCount = byId("notifications-count");
 
 const numero = n => new Intl.NumberFormat("es-MX").format(n);
 const plural = (n, uno, varios) => `${numero(n)} ${n === 1 ? uno : varios}`;
@@ -130,6 +133,33 @@ async function cargarFrecuentes() {
   }
 }
 
+// ---------- Notificaciones de estado ----------
+function tarjetaNotificacion(notificacion) {
+  const li = document.createElement("li");
+  li.className = "notification-item";
+  li.append(
+    makeText("strong", "notification-item__title", `Pedido #${notificacion.id_pedido} · ${capitalizar(notificacion.estado.replaceAll("_", " "))}`),
+    makeText("span", "notification-item__message", notificacion.mensaje),
+    makeText("time", "notification-item__date", formatoFecha(notificacion.fecha))
+  );
+  return li;
+}
+
+async function cargarNotificaciones() {
+  try {
+    const avisos = await pedirJson("/api/clientes/yo/notificaciones?limite=30");
+    if (!Array.isArray(avisos)) throw new Error("La respuesta del servidor no tiene el formato esperado.");
+    notificationsList.replaceChildren(...avisos.map(tarjetaNotificacion));
+    notificationsCount.textContent = plural(avisos.length, "aviso", "avisos");
+    notificationsStatus.hidden = avisos.length > 0;
+    if (avisos.length === 0) notificationsStatus.textContent = "Todavía no tienes notificaciones de pedidos.";
+  } catch (error) {
+    if (error.sinSesion) { mostrarLogin(); return; }
+    notificationsStatus.hidden = false;
+    notificationsStatus.textContent = `No pudimos cargar las notificaciones. ${error.message}`;
+  }
+}
+
 // ---------- Historial de pedidos ----------
 function lineaPedido(item) {
   const li = document.createElement("li");
@@ -149,6 +179,10 @@ function tarjetaPedido(pedido) {
   const titulo = document.createElement("div");
   titulo.append(makeText("h3", "hist-order__title", `Pedido #${pedido.id_pedido}`));
   titulo.append(makeText("span", "hist-order__date", formatoFecha(pedido.fecha)));
+  titulo.append(makeText("span", "hist-order__date",
+    pedido.modalidad_entrega === "recoleccion_tienda"
+      ? `🏬 Recolección en tienda · ${pedido.sucursal_recoleccion || "Sucursal principal"}`
+      : "🚚 Entrega a domicilio"));
   cabecera.append(titulo, makeText("span", "hist-badge", capitalizar(pedido.estado)));
 
   const lista = document.createElement("ul");
@@ -254,4 +288,7 @@ if (!Sesion.leer()) {
   contentBox.hidden = false;
   cargarFrecuentes();
   cargarPedidos();
+  cargarNotificaciones();
+  // Actualiza avisos mientras el cliente mantiene abierta la página.
+  window.setInterval(cargarNotificaciones, 30000);
 }
