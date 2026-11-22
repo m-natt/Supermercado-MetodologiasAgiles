@@ -74,12 +74,14 @@ CREATE TABLE carrito (
 CREATE TABLE pedidos (
   id_pedido INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
   id_cliente INT NOT NULL,
-  id_direccion INT NOT NULL,
+  id_direccion INT NULL,
   fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   estado VARCHAR(20) NOT NULL,
   total DECIMAL(10,2) NOT NULL,
   costo_envio DECIMAL(8,2) NOT NULL,
   fecha_entrega DATETIME,
+  modalidad_entrega VARCHAR(30) NOT NULL DEFAULT 'domicilio',
+  sucursal_recoleccion VARCHAR(120),
   FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
   FOREIGN KEY (id_direccion) REFERENCES direcciones(id_direccion)
 );
@@ -165,3 +167,19 @@ CREATE TABLE recuperaciones (
   creada DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE
 );
+
+
+-- ===== Notificaciones de estado del pedido =====
+CREATE TABLE notificaciones_pedido (
+  id_notificacion INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+  id_cliente INT NOT NULL,
+  id_pedido INT NOT NULL,
+  estado VARCHAR(20) NOT NULL,
+  mensaje VARCHAR(255) NOT NULL,
+  fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  leida TINYINT(1) NOT NULL DEFAULT 0,
+  INDEX idx_notificaciones_cliente_fecha (id_cliente, fecha),
+  FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE,
+  FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido) ON DELETE CASCADE
+);
+
