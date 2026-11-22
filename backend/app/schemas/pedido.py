@@ -34,6 +34,8 @@ class DireccionPedido(Entrada):
 
 class PedidoEntrada(Entrada):
     cliente: ClientePedido
+    modalidad_entrega: Literal["domicilio", "recoleccion_tienda"] = "domicilio"
+    sucursal_recoleccion: Optional[str] = Field(default=None, max_length=120)
     # Si se manda id_direccion se usa una dirección guardada del cliente.
     # Si no se manda, direccion contiene una dirección nueva que se guardará.
     id_direccion: Optional[int] = Field(default=None, gt=0)
@@ -53,8 +55,14 @@ class PedidoEntrada(Entrada):
 
     @model_validator(mode="after")
     def validar_direccion(self):
-        if self.id_direccion is None and self.direccion is None:
-            raise ValueError("Debes seleccionar una dirección o capturar una nueva.")
+        if self.modalidad_entrega == "domicilio":
+            if self.id_direccion is None and self.direccion is None:
+                raise ValueError("Debes seleccionar una dirección o capturar una nueva.")
+        else:
+            if self.id_direccion is not None or self.direccion is not None:
+                raise ValueError("La recolección en tienda no requiere dirección de entrega.")
+            if not self.sucursal_recoleccion:
+                raise ValueError("Selecciona una sucursal para recoger tu pedido.")
         return self
 
 
