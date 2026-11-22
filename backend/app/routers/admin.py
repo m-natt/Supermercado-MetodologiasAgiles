@@ -11,7 +11,7 @@ router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(ad
 
 
 class EstadoEntrada(BaseModel):
-    estado: Literal["confirmado", "preparando", "en_camino", "entregado", "cancelado"]
+    estado: Literal["confirmado", "preparando", "en_camino", "listo_para_recoger", "entregado", "cancelado"]
 
 
 class RolEntrada(BaseModel):
