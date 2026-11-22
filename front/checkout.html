@@ -96,7 +96,32 @@
           <p id="saved-addresses-error" class="form-error" role="alert" hidden></p>
         </section>
 
-        <section class="panel" aria-labelledby="address-title">
+        <section class="panel" aria-labelledby="delivery-mode-title">
+          <h2 id="delivery-mode-title">Modalidad de recolección</h2>
+          <div class="payment-options">
+            <label class="payment-option">
+              <input type="radio" name="modalidad_entrega" value="domicilio" checked>
+              <span class="payment-option__icon" aria-hidden="true">🚚</span>
+              <span><strong>Entrega a domicilio</strong><small>Recibe tu pedido en la dirección que indiques.</small></span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="modalidad_entrega" value="recoleccion_tienda">
+              <span class="payment-option__icon" aria-hidden="true">🏬</span>
+              <span><strong>Recolección en tienda</strong><small>Recoge tu pedido en la sucursal seleccionada. No se cobra envío.</small></span>
+            </label>
+          </div>
+          <div id="pickup-fields" class="field-grid" hidden style="margin-top:14px">
+            <label class="field field--wide">
+              <span>Sucursal para recoger *</span>
+              <select name="sucursal_recoleccion">
+                <option value="Sucursal principal">Sucursal principal (demostración)</option>
+              </select>
+              <small>La dirección real de la sucursal debe configurarse antes de publicar el sistema.</small>
+            </label>
+          </div>
+        </section>
+
+        <section class="panel" id="address-panel" aria-labelledby="address-title">
           <div class="panel__head">
             <h2 id="address-title">Dirección de entrega</h2>
             <span id="address-mode" class="address-mode">Nueva dirección</span>
