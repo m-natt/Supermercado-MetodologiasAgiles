@@ -3,7 +3,7 @@
 const $ = id => document.getElementById(id);
 const ETIQUETA = {
   confirmado: "Confirmado", preparando: "Preparando", en_camino: "En camino",
-  entregado: "Entregado", cancelado: "Cancelado",
+  listo_para_recoger: "Listo para recoger", entregado: "Entregado", cancelado: "Cancelado",
 };
 const ESTADOS_FINALES = ["entregado", "cancelado"];
 
@@ -250,7 +250,10 @@ async function cargarPedidos() {
   const cuerpo = $("ped-body");
   if (!pedidos.length) return vaciar(cuerpo, 6, "No hay pedidos con ese filtro.");
   cuerpo.replaceChildren(...pedidos.map(p => {
-    const sel = selector(Object.keys(ETIQUETA), p.estado, ETIQUETA);
+    const estadosDisponibles = p.modalidad_entrega === "recoleccion_tienda"
+      ? ["confirmado", "preparando", "listo_para_recoger", "entregado", "cancelado"]
+      : ["confirmado", "preparando", "en_camino", "entregado", "cancelado"];
+    const sel = selector(estadosDisponibles, p.estado, ETIQUETA);
     sel.disabled = ESTADOS_FINALES.includes(p.estado);
     sel.addEventListener("change", () => cambiarEstado(p, sel.value));
     const fila = document.createElement("tr");
@@ -259,7 +262,9 @@ async function cargarPedidos() {
       celda(textoDoble(p.cliente, p.correo)),
       celda(money(p.total), "inv-num"),
       celda(p.metodo ? `${p.metodo} (${p.estado_pago})` : "—"),
-      celda(fecha(p.fecha_entrega)),
+      celda(p.modalidad_entrega === "recoleccion_tienda"
+        ? `🏬 ${p.sucursal_recoleccion || "Sucursal principal"}`
+        : fecha(p.fecha_entrega)),
       celda(sel),
     );
     return fila;
