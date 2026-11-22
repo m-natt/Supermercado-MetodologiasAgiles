@@ -41,10 +41,10 @@ function mostrarLogin() {
   contentBox.hidden = true;
 }
 
-async function pedirJson(ruta) {
+async function pedirJson(ruta, opciones = {}) {
   let respuesta;
   try {
-    respuesta = await fetch(`${API_BASE}${ruta}`, { headers: Sesion.cabeceras() });
+    respuesta = await fetch(`${API_BASE}${ruta}`, { ...opciones, headers: Sesion.cabeceras() });
   } catch {
     throw new Error("No hay conexión con el servidor. ¿Está encendido el backend?");
   }
@@ -134,9 +134,11 @@ async function cargarFrecuentes() {
 }
 
 // ---------- Notificaciones de estado ----------
+const avisosNuevosEnPantalla = new Set();   // ids que llegaron sin leer mientras la página está abierta
+
 function tarjetaNotificacion(notificacion) {
   const li = document.createElement("li");
-  li.className = "notification-item";
+  li.className = "notification-item" + (notificacion.leida ? "" : " notification-item--nueva");
   li.append(
     makeText("strong", "notification-item__title", `Pedido #${notificacion.id_pedido} · ${capitalizar(notificacion.estado.replaceAll("_", " "))}`),
     makeText("span", "notification-item__message", notificacion.mensaje),
@@ -149,10 +151,18 @@ async function cargarNotificaciones() {
   try {
     const avisos = await pedirJson("/api/clientes/yo/notificaciones?limite=30");
     if (!Array.isArray(avisos)) throw new Error("La respuesta del servidor no tiene el formato esperado.");
+    // Los que ya estaban resaltados en pantalla siguen resaltados hasta recargar
+    avisos.forEach(a => { if (avisosNuevosEnPantalla.has(a.id_notificacion)) a.leida = false; });
+    const nuevos = avisos.filter(a => !a.leida);
+    nuevos.forEach(a => avisosNuevosEnPantalla.add(a.id_notificacion));
     notificationsList.replaceChildren(...avisos.map(tarjetaNotificacion));
-    notificationsCount.textContent = plural(avisos.length, "aviso", "avisos");
+    notificationsCount.textContent = nuevos.length
+      ? `${plural(nuevos.length, "nuevo", "nuevos")} · ${plural(avisos.length, "aviso", "avisos")}`
+      : plural(avisos.length, "aviso", "avisos");
     notificationsStatus.hidden = avisos.length > 0;
     if (avisos.length === 0) notificationsStatus.textContent = "Todavía no tienes notificaciones de pedidos.";
+    // Ya se mostraron: quedan como leídos en el servidor (si falla, se reintenta en la próxima carga)
+    if (nuevos.length) pedirJson("/api/clientes/yo/notificaciones/leidas", { method: "PUT" }).catch(() => {});
   } catch (error) {
     if (error.sinSesion) { mostrarLogin(); return; }
     notificationsStatus.hidden = false;
@@ -212,7 +222,7 @@ function tarjetaPedido(pedido) {
     acciones.append(factura);
   }
   // Entrega: se puede reprogramar mientras el pedido no haya salido
-  if (["confirmado", "preparando"].includes(pedido.estado)) {
+  if (["confirmado", "preparando"].includes(pedido.estado) && pedido.modalidad_entrega !== "recoleccion_tienda") {
     const entrega = makeText("a", "secondary-button hist-order__button", "📅 Programar entrega");
     entrega.href = `programar-entrega.html?pedido=${encodeURIComponent(pedido.id_pedido)}`;
     acciones.append(entrega);

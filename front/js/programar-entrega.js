@@ -9,6 +9,8 @@
   const DIAS_MAX = 14;
   const ANTICIPACION_MIN_MS = 60 * 60 * 1000;      // 1 hora
   const ESTADOS_PROGRAMABLES = ["confirmado", "preparando"];
+  // Los pedidos para recoger en tienda no tienen entrega a domicilio que programar
+  const programable = p => ESTADOS_PROGRAMABLES.includes(p.estado) && p.modalidad_entrega !== "recoleccion_tienda";
 
   const $ = id => document.getElementById(id);
   const dos = n => String(n).padStart(2, "0");
@@ -63,7 +65,7 @@
     if (Sesion.leer()) {
       try {
         const mios = await api("/api/clientes/yo/pedidos?limite=50");
-        return mios.filter(p => ESTADOS_PROGRAMABLES.includes(p.estado));
+        return mios.filter(programable);
       } catch (e) {
         if (e.status !== 401) throw e;
         Sesion.borrar();   // sesión vencida: se sigue como invitado
@@ -71,7 +73,8 @@
     }
     // Invitado: solo puede programar el pedido que acaba de hacer en esta pestaña
     const ultimo = leerUltimoPedido();
-    return ultimo ? [{ ...ultimo, estado: ultimo.estado || "confirmado" }] : [];
+    const pedido = ultimo ? { ...ultimo, estado: ultimo.estado || "confirmado" } : null;
+    return pedido && programable(pedido) ? [pedido] : [];
   }
 
   // ---------- Textos ----------
@@ -262,7 +265,7 @@
     if (!pedidos.length) {
       const conSesion = !!Sesion.leer();
       $("sin-pedidos-texto").textContent = conSesion
-        ? "Solo se puede programar la entrega de pedidos confirmados o en preparación, y ahora no tienes ninguno."
+        ? "Solo se puede programar la entrega a domicilio de pedidos confirmados o en preparación, y ahora no tienes ninguno."
         : "Haz un pedido o inicia sesión para programar la entrega de tus pedidos.";
       $("sin-pedidos-login").hidden = conSesion;
       $("sin-pedidos").hidden = false;

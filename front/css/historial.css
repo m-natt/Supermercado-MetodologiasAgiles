@@ -72,3 +72,10 @@
 .notification-item__message { font-size: 14px; }
 .notification-item__date { color: var(--muted); font-size: 12px; }
 
+
+/* Aviso que llegó sin leer */
+.notification-item--nueva { border-color: var(--green); background: var(--green-soft); }
+.notification-item--nueva .notification-item__title::after {
+  content: "Nuevo"; margin-left: 8px; padding: 2px 8px; border-radius: 999px;
+  background: var(--green); color: #fff; font-size: 11px; font-weight: 800; vertical-align: middle;
+}

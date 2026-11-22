@@ -42,3 +42,9 @@ def mis_notificaciones(
 ):
     # Solo se devuelven notificaciones de la cuenta autenticada.
     return {"ok": True, "data": notificacion_service.notificaciones_del_cliente(cliente["id_cliente"], limite)}
+
+
+@router.put("/notificaciones/leidas")
+def marcar_notificaciones_leidas(cliente=Depends(cliente_actual)):
+    # La página lo llama después de mostrar los avisos nuevos
+    return {"ok": True, "data": {"marcadas": notificacion_service.marcar_leidas(cliente["id_cliente"])}}

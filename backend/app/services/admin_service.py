@@ -4,6 +4,11 @@ from app.services.inventario_service import UMBRAL_DEFECTO
 ROLES = ("cliente", "administrador")
 ESTADOS_PEDIDO = ("confirmado", "preparando", "en_camino", "listo_para_recoger", "entregado", "cancelado")
 ESTADOS_FINALES = ("entregado", "cancelado")
+# Domicilio pasa por "en camino"; recolección pasa por "listo para recoger"
+ESTADOS_POR_MODALIDAD = {
+    "domicilio": ("confirmado", "preparando", "en_camino", "entregado", "cancelado"),
+    "recoleccion_tienda": ("confirmado", "preparando", "listo_para_recoger", "entregado", "cancelado"),
+}
 
 
 class AdminInvalido(Exception):
@@ -65,13 +70,21 @@ def listar_pedidos(estado=None, limite=100):
 
 def cambiar_estado_pedido(id_pedido, nuevo):
     with transaccion() as cursor:
-        cursor.execute("SELECT id_cliente, estado FROM pedidos WHERE id_pedido = %s FOR UPDATE", (id_pedido,))
+        cursor.execute(
+            "SELECT id_cliente, estado, modalidad_entrega FROM pedidos WHERE id_pedido = %s FOR UPDATE",
+            (id_pedido,),
+        )
         fila = cursor.fetchone()
         if fila is None:
             raise NoEncontrado()
         anterior = fila["estado"]
         if anterior in ESTADOS_FINALES:
             raise AdminInvalido(f"El pedido ya está {anterior} y no se puede cambiar.")
+        # Cada modalidad tiene su propio paso intermedio
+        if nuevo not in ESTADOS_POR_MODALIDAD.get(fila["modalidad_entrega"], ESTADOS_PEDIDO):
+            if fila["modalidad_entrega"] == "recoleccion_tienda":
+                raise AdminInvalido("Un pedido para recoger en tienda no puede ir 'en camino'.")
+            raise AdminInvalido("Solo los pedidos para recoger en tienda pueden estar 'listos para recoger'.")
         cursor.execute("UPDATE pedidos SET estado = %s WHERE id_pedido = %s", (nuevo, id_pedido))
         if nuevo != anterior:
             etiquetas = {

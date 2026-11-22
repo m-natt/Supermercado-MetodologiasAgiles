@@ -14,6 +14,10 @@ CONTRASENA_INVITADO = "!"
 
 CENTAVOS = Decimal("0.01")
 
+# Sucursales donde se puede recoger un pedido. Solo se aceptan estos nombres.
+# (front/checkout.html tiene el mismo <select>; si agregas una aquí, agrégala allá)
+SUCURSALES = ("Sucursal principal",)
+
 
 class PedidoInvalido(Exception):
     """El pedido no se puede crear (producto inexistente, sin stock, etc.)."""
@@ -109,6 +113,8 @@ def crear(datos, cliente_sesion=None):
         id_direccion = None
         modalidad = datos.modalidad_entrega
         sucursal = datos.sucursal_recoleccion if modalidad == "recoleccion_tienda" else None
+        if sucursal is not None and sucursal not in SUCURSALES:
+            raise PedidoInvalido("Esa sucursal no existe. Elige una de la lista.")
 
         if cliente_sesion:
             id_cliente = cliente_sesion["id_cliente"]
@@ -302,7 +308,7 @@ def programar_entrega(id_pedido, datos, cliente_sesion=None):
 
     with transaccion() as cursor:
         cursor.execute(
-            """SELECT p.id_cliente, p.estado, c.contrasena
+            """SELECT p.id_cliente, p.estado, p.modalidad_entrega, c.contrasena
                FROM pedidos p
                JOIN clientes c ON c.id_cliente = p.id_cliente
                WHERE p.id_pedido = %s
@@ -316,6 +322,8 @@ def programar_entrega(id_pedido, datos, cliente_sesion=None):
         es_de_cuenta = fila["contrasena"] != CONTRASENA_INVITADO
         if es_de_cuenta and (not cliente_sesion or cliente_sesion["id_cliente"] != fila["id_cliente"]):
             raise PedidoNoEncontrado()
+        if fila["modalidad_entrega"] == "recoleccion_tienda":
+            raise PedidoInvalido("Este pedido se recoge en tienda; no tiene entrega a domicilio que programar.")
         if fila["estado"] not in ESTADOS_PROGRAMABLES:
             estado = fila["estado"].replace("_", " ")
             raise PedidoInvalido(f"El pedido ya está {estado}; ya no se puede cambiar la entrega.")
