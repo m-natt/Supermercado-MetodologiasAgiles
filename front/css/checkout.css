@@ -153,7 +153,8 @@
 .field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
 .field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: var(--ink); }
 .field--wide { grid-column: 1 / -1; }
-.field input {
+.field input,
+.field select {
   width: 100%;
   padding: 11px 12px;
   border: 1px solid #e3d9d6;
@@ -164,7 +165,8 @@
   font-size: 15px;
   font-weight: 500;
 }
-.field input:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; border-color: transparent; }
+.field input:focus-visible,
+.field select:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; border-color: transparent; }
 .field input:user-invalid { border-color: #c0392b; background: #fff8f7; }
 .cp-status { min-height: 1em; font-size: 12px; font-weight: 600; color: var(--muted); }
 .cp-status.is-ok { color: #2e7d4f; }
