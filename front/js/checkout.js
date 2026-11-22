@@ -30,7 +30,12 @@ let selectedAddressId = null;
 let editingAddressId = null;
 
 // Devuelve el costo de envío, o null si todavía no se conoce
+function modalidadActual() {
+  return form.elements.modalidad_entrega?.value || "domicilio";
+}
+
 function shippingFor(subtotal) {
+  if (modalidadActual() === "recoleccion_tienda") return 0;
   if (subtotal >= ENVIO_GRATIS_DESDE) return 0;
   return zona?.cubierto ? Number(zona.costo_envio) : null;
 }
@@ -134,9 +139,11 @@ function render() {
   const free = shipping === 0
     ? "🎉 Tu pedido tiene envío gratis."
     : `Agrega ${money(ENVIO_GRATIS_DESDE - subtotal)} más para obtener envío gratis.`;
-  shippingHint.textContent = zona?.cubierto
-    ? `🚚 Entrega en ${zona.ciudad}${zona.tiempo_estimado_min ? ` en aprox. ${zona.tiempo_estimado_min} min` : ""}. ${free}`
-    : shipping === 0 ? free : `Escribe tu código postal para calcular el envío. ${free}`;
+  shippingHint.textContent = modalidadActual() === "recoleccion_tienda"
+    ? "🏬 Recogerás tu pedido en la sucursal seleccionada. El envío es gratis."
+    : zona?.cubierto
+      ? `🚚 Entrega en ${zona.ciudad}${zona.tiempo_estimado_min ? ` en aprox. ${zona.tiempo_estimado_min} min` : ""}. ${free}`
+      : shipping === 0 ? free : `Escribe tu código postal para calcular el envío. ${free}`;
 
   if (focusKey) {
     const target = cartList.querySelector(`[data-focus="${focusKey}"]`);
@@ -168,8 +175,14 @@ function buildPayload() {
       telefono: text("telefono"),
     },
     metodo_pago: text("metodo_pago"),
+    modalidad_entrega: text("modalidad_entrega") || "domicilio",
     items: Carrito.leer().map(i => ({ id_producto: i.id_producto, cantidad: i.cantidad })),
   };
+
+  if (payload.modalidad_entrega === "recoleccion_tienda") {
+    payload.sucursal_recoleccion = text("sucursal_recoleccion");
+    return payload;
+  }
 
   if (selectedAddressId) {
     payload.id_direccion = selectedAddressId;
@@ -249,7 +262,7 @@ function selectSavedAddress(id) {
 }
 
 function renderSavedAddresses() {
-  if (!savedPanel || !Sesion.leer()) {
+  if (!savedPanel || !Sesion.leer() || modalidadActual() === "recoleccion_tienda") {
     if (savedPanel) savedPanel.hidden = true;
     return;
   }
@@ -473,6 +486,35 @@ form.addEventListener("submit", async event => {
   }
 });
 
+// Modalidad de entrega: alterna los campos requeridos y recalcula el envío.
+const addressPanel = document.getElementById("address-panel");
+const pickupFields = document.getElementById("pickup-fields");
+function updateDeliveryMode() {
+  const pickup = modalidadActual() === "recoleccion_tienda";
+  addressPanel.hidden = pickup;
+  pickupFields.hidden = !pickup;
+  ["calle", "colonia", "ciudad", "codigo_postal"].forEach(name => {
+    form.elements[name].required = !pickup;
+    form.elements[name].disabled = pickup;
+  });
+  form.elements.referencias.disabled = pickup;
+  if (pickup) {
+    selectedAddressId = null;
+    cpRequest++;
+    zona = null;
+    setCpStatus("No se necesita código postal para recoger en tienda.");
+  } else {
+    form.elements.sucursal_recoleccion.disabled = true;
+    checkCoverage();
+  }
+  form.elements.sucursal_recoleccion.disabled = !pickup;
+  renderSavedAddresses();
+  render();
+}
+form.querySelectorAll('input[name="modalidad_entrega"]').forEach(input =>
+  input.addEventListener("change", updateDeliveryMode)
+);
+
 // Cobertura: al escribir el código postal se consulta si hay entrega
 const cpInput = form.elements.codigo_postal;
 const cpStatus = document.getElementById("cp-status");
@@ -484,6 +526,14 @@ function setCpStatus(text, kind = "") {
 }
 
 async function checkCoverage() {
+  if (modalidadActual() === "recoleccion_tienda") {
+    cpRequest++;
+    zona = null;
+    cpInput.setCustomValidity("");
+    setCpStatus("No se necesita código postal para recoger en tienda.");
+    render();
+    return;
+  }
   const cp = cpInput.value.trim();
   const thisRequest = ++cpRequest;
   zona = null;
@@ -517,6 +567,7 @@ async function checkCoverage() {
 }
 
 cpInput.addEventListener("input", checkCoverage);
+updateDeliveryMode();
 
 // Con sesión iniciada: rellena los datos del cliente y bloquea el correo
 const sessionNote = document.getElementById("session-note");
