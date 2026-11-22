@@ -46,6 +46,15 @@
       <!-- Avisos al agregar productos al carrito -->
       <div id="hist-message" class="hist-message" role="status" aria-live="polite" hidden></div>
 
+      <section class="panel" aria-labelledby="notifications-title">
+        <div class="panel__head">
+          <h2 id="notifications-title">🔔 Notificaciones de tus pedidos</h2>
+          <span id="notifications-count" class="product-count"></span>
+        </div>
+        <p id="notifications-status" class="hist-status">Cargando notificaciones…</p>
+        <ul id="notifications-list" class="notifications-list"></ul>
+      </section>
+
       <section class="panel" aria-labelledby="freq-title">
         <div class="panel__head">
           <h2 id="freq-title">Compras frecuentes</h2>
@@ -71,3 +80,4 @@
   </footer>
 </body>
 </html>
+
