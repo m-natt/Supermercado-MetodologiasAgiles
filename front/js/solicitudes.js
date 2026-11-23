@@ -1,15 +1,10 @@
 /* Supermercado Bonito :3 — Denuncias y reembolsos (demo)
- * No requiere editar catalogo.js, historial.js ni HTML.
- * Carga este archivo en la página (DevTools > Console) y deja solicitudes.css junto a él.
+ * Se carga en index.html e historial.html junto con css/solicitudes.css.
+ * Agrega sus botones sin editar catalogo.js ni historial.js.
  */
 (() => {
   if (window.__solicitudesDemoInstalado) return;
   window.__solicitudesDemoInstalado = true;
-
-  const css = document.createElement('link');
-  css.rel = 'stylesheet';
-  css.href = new URL('./solicitudes.css', location.href).href;
-  document.head.appendChild(css);
 
   const guardar = (tipo, datos) => {
     const clave = 'supermercado_solicitudes_demo';
@@ -27,8 +22,10 @@
 
   function abrirModal(tipo, datos) {
     document.querySelector('.sd-overlay')?.remove();
-    const overlay = el('div', 'sd-overlay');
-    const modal = el('section', 'sd-modal'); modal.setAttribute('role', 'dialog'); modal.setAttribute('aria-modal', 'true');
+    // Es un <dialog> para abrirse encima del detalle del producto, que también es modal
+    const overlay = el('dialog', 'sd-overlay');
+    overlay.addEventListener('close', () => overlay.remove());
+    const modal = el('section', 'sd-modal');
     const head = el('header', 'sd-head');
     const titulo = tipo === 'DEN' ? 'Denunciar producto o vendedor' : 'Solicitar reembolso';
     head.append(el('div', 'sd-kicker', 'SUPERMERCADO BONITO :3'), el('h2', '', titulo));
@@ -62,7 +59,7 @@
     form.append(nota, acciones);
     form.addEventListener('submit', e => { e.preventDefault(); if (!form._validar()) { aviso.textContent = 'Completa todos los campos correctamente. La explicación debe tener al menos 8 caracteres.'; aviso.className = 'sd-alert sd-alert-error'; return; } const folio = guardar(tipo, form._datos()); form.replaceChildren(); const ok = el('div', 'sd-success'); ok.append(el('div', 'sd-check', '✓'), el('h3', '', tipo === 'DEN' ? 'Denuncia enviada' : 'Solicitud registrada'), el('p', '', 'Tu información quedó registrada en esta demostración.'), el('strong', 'sd-folio', `Folio: ${folio}`), el('p', 'sd-muted', 'Puedes cerrar esta ventana. No se ha realizado ningún envío al servidor.')); const done = el('button', 'sd-btn sd-btn-primary', 'Entendido'); done.type = 'button'; done.onclick = () => overlay.remove(); ok.append(done); form.append(ok); });
     const aviso = el('p', 'sd-alert'); aviso.setAttribute('role', 'alert'); form.prepend(aviso);
-    modal.append(head, resumen, form); overlay.append(modal); overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); }); document.body.append(overlay);
+    modal.append(head, resumen, form); overlay.append(modal); overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); }); overlay.setAttribute('aria-label', titulo); document.body.append(overlay); overlay.showModal();
   }
 
   function agregarBotonProducto() {
