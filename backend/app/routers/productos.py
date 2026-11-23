@@ -25,16 +25,17 @@ def listar(
     precio_min: Optional[Decimal] = Query(default=None, ge=0),
     precio_max: Optional[Decimal] = Query(default=None, ge=0),
     incluir_inactivos: bool = False,
+    q: Optional[str] = Query(default=None, max_length=100),
 ):
     # Filtros opcionales, se pueden combinar:
-    # /api/productos?id_categoria=2&id_marca=5&precio_min=10&precio_max=50
+    # /api/productos?q=leche&id_categoria=2&id_marca=5&precio_min=10&precio_max=50
     if precio_min is not None and precio_max is not None and precio_min > precio_max:
         raise HTTPException(
             status_code=400,
             detail="El precio minimo no puede ser mayor que el precio maximo.",
         )
     productos = producto_service.listar(
-        id_categoria, incluir_inactivos, id_marca, precio_min, precio_max
+        id_categoria, incluir_inactivos, id_marca, precio_min, precio_max, q
     )
     return {"ok": True, "data": productos}
 

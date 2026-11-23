@@ -11,13 +11,14 @@ const maxInput = document.getElementById("filter-max");
 const clearButton = document.getElementById("filter-clear");
 const filtersForm = document.getElementById("filters");
 const filterError = document.getElementById("filter-error");
+const searchInput = document.getElementById("search-input");
 const catalogSection = document.getElementById("catalogo");
 const catalogTitle = document.getElementById("catalog-title");
 const DEFAULT_TITLE = catalogTitle.textContent;
 let categoryName = ""; // nombre de la categoría seleccionada (para el título)
 
 // Filtros activos. Un valor vacío ("") significa "sin filtro".
-const filters = { categoria: "", marca: "", min: "", max: "" };
+const filters = { q: "", categoria: "", marca: "", min: "", max: "" };
 let requestId = 0; // evita que una respuesta lenta pise a una más reciente
 
 document.getElementById("dialog-close").addEventListener("click", () => dialog.close());
@@ -166,6 +167,7 @@ function hasActiveFilters() {
 
 function buildQuery() {
   const params = new URLSearchParams();
+  if (filters.q !== "") params.set("q", filters.q);
   if (filters.categoria !== "") params.set("id_categoria", filters.categoria);
   if (filters.marca !== "") params.set("id_marca", filters.marca);
   if (filters.min !== "") params.set("precio_min", filters.min);
@@ -195,7 +197,7 @@ async function loadCatalog() {
     if (products.length === 0) {
       showStatus(
         hasActiveFilters()
-          ? "No encontramos productos con esos filtros. Prueba cambiándolos o limpiándolos."
+          ? "No encontramos productos con esa búsqueda o filtros. Prueba cambiándolos o limpiándolos."
           : "Todavía no hay productos para mostrar.",
         "empty"
       );
@@ -342,9 +344,35 @@ minInput.addEventListener("input", onPriceChange);
 maxInput.addEventListener("input", onPriceChange);
 filtersForm.addEventListener("submit", event => event.preventDefault());
 
+/* ===== Barra de búsqueda ===== */
+let searchTimer;
+function applySearch() {
+  clearTimeout(searchTimer);
+  const text = searchInput.value.trim();
+  if (text === filters.q) return false;
+  filters.q = text;
+  loadCatalog();
+  return true;
+}
+
+searchInput.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    if (applySearch() && filters.q) catalogSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, 300);
+});
+searchInput.addEventListener("keydown", event => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  applySearch();
+  catalogSection.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
 clearButton.addEventListener("click", () => {
   clearTimeout(priceTimer);
-  filters.categoria = filters.marca = filters.min = filters.max = "";
+  clearTimeout(searchTimer);
+  filters.q = filters.categoria = filters.marca = filters.min = filters.max = "";
+  searchInput.value = "";
   categoryName = "";
   brandSelect.value = "";
   minInput.value = "";

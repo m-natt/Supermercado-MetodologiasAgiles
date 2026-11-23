@@ -13,7 +13,7 @@ SELECT_PRODUCTO = """
 
 
 def listar(id_categoria=None, incluir_inactivos=False,
-           id_marca=None, precio_min=None, precio_max=None):
+           id_marca=None, precio_min=None, precio_max=None, busqueda=None):
     condiciones = []
     params = []
     if not incluir_inactivos:
@@ -30,6 +30,11 @@ def listar(id_categoria=None, incluir_inactivos=False,
     if precio_max is not None:
         condiciones.append("p.precio <= %s")
         params.append(precio_max)
+    # Cada palabra debe aparecer en el nombre, la categoria o la marca
+    for palabra in (busqueda or "").split():
+        escapada = palabra.replace("|", "||").replace("%", "|%").replace("_", "|_")
+        condiciones.append("CONCAT_WS(' ', p.nombre, c.nombre, m.nombre) LIKE %s ESCAPE '|'")
+        params.append(f"%{escapada}%")
 
     sql = SELECT_PRODUCTO
     if condiciones:
