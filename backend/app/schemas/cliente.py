@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from pydantic import Field, StringConstraints, field_validator
 
@@ -61,3 +61,23 @@ class ConfirmarRecuperacionEntrada(RecuperarEntrada):
     @classmethod
     def contrasena_segura(cls, valor):
         return _validar_contrasena(valor)
+
+
+# ---------- Editar perfil ----------
+
+class PerfilEntrada(Entrada):
+    """Datos del perfil que el cliente puede editar.
+
+    El correo no se incluye a propósito: identifica la cuenta (inicio de sesión,
+    pedidos y tarjetas guardadas), así que no se puede cambiar desde aquí.
+    """
+    nombre: str = Field(min_length=1, max_length=100)
+    apellidos: Optional[str] = Field(default=None, max_length=100)
+    telefono: str = Field(min_length=10, max_length=20, pattern=r"^[0-9 +()-]+$")
+
+    @field_validator("telefono")
+    @classmethod
+    def telefono_con_digitos(cls, valor):
+        if sum(c.isdigit() for c in valor) < 10:
+            raise ValueError("El teléfono debe tener al menos 10 dígitos.")
+        return valor

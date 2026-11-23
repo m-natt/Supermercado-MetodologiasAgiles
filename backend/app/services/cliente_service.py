@@ -89,5 +89,15 @@ def cliente_por_token(token):
     return filas[0] if filas else None
 
 
+def actualizar_perfil(id_cliente, datos):
+    """Guarda nombre, apellidos y teléfono. Devuelve los datos públicos ya actualizados."""
+    with transaccion() as cursor:
+        cursor.execute(
+            "UPDATE clientes SET nombre = %s, apellidos = %s, telefono = %s WHERE id_cliente = %s",
+            (datos.nombre, datos.apellidos or None, datos.telefono, id_cliente),
+        )
+        return _publico(cursor, id_cliente)
+
+
 def cerrar_sesion(token):
     ejecutar("DELETE FROM sesiones WHERE token_hash = %s", (hash_token(token),))
