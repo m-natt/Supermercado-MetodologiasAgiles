@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.dependencias import cliente_actual, token_actual
 from app.schemas.cliente import (
-    ConfirmarRecuperacionEntrada, LoginEntrada, RecuperarEntrada, RegistroEntrada,
+    ConfirmarRecuperacionEntrada, LoginEntrada, PerfilEntrada, RecuperarEntrada, RegistroEntrada,
 )
 from app.seguridad import (
     codigos_por_correo, codigos_por_ip, intentos_por_correo, intentos_por_ip,
@@ -49,6 +49,13 @@ def iniciar_sesion(datos: LoginEntrada, request: Request):
 @router.get("/yo")
 def mis_datos(cliente=Depends(cliente_actual)):
     return {"ok": True, "data": cliente}
+
+
+@router.put("/yo")
+def actualizar_mis_datos(datos: PerfilEntrada, cliente=Depends(cliente_actual)):
+    """Editar el perfil del cliente con sesión iniciada (nombre, apellidos y teléfono)."""
+    actualizado = cliente_service.actualizar_perfil(cliente["id_cliente"], datos)
+    return {"ok": True, "data": actualizado}
 
 
 @router.post("/logout")

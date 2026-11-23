@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Editar los datos de mi perfil">
+  <title>Supermercado Bonito :3 | Editar mi perfil</title>
+  <link rel="stylesheet" href="css/styles.css?v=2026112201">
+  <link rel="stylesheet" href="css/diseno.css?v=2026112201">
+  <link rel="stylesheet" href="css/checkout.css?v=2026112201">
+  <link rel="stylesheet" href="css/perfil.css?v=2026112201">
+  <script src="js/config.js?v=2026112201" defer></script>
+  <script src="js/carrito.js?v=2026112201" defer></script>
+  <script src="js/sesion.js?v=2026112201" defer></script>
+  <script src="js/perfil.js?v=2026112201" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario"><span class="usuario__icono">👤</span> Mi cuenta</a>
+      <a href="checkout.html" class="carrito"><span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span></a>
+    </div>
+  </header>
+
+  <main class="container checkout-page">
+    <a href="usuarios.html" class="back-link">← Volver a mi cuenta</a>
+    <h1 class="page-title">Editar mi perfil</h1>
+
+    <!-- Se muestra si no hay sesión iniciada -->
+    <section id="perfil-login" class="panel empty-cart" hidden>
+      <span class="empty-cart__icon" aria-hidden="true">🔒</span>
+      <h2>Inicia sesión para editar tu perfil</h2>
+      <p>Necesitas una cuenta para cambiar tus datos personales.</p>
+      <a href="usuarios.html" class="primary-button">Iniciar sesión</a>
+    </section>
+
+    <section id="perfil-contenido" class="panel" aria-labelledby="perfil-titulo" hidden>
+      <h2 id="perfil-titulo">Mis datos</h2>
+      <form id="perfil-form" autocomplete="on" novalidate>
+        <div class="field-grid">
+          <label class="field"><span>Nombre *</span>
+            <input id="nombre" name="nombre" maxlength="100" autocomplete="given-name" required></label>
+          <label class="field"><span>Apellidos</span>
+            <input id="apellidos" name="apellidos" maxlength="100" autocomplete="family-name"></label>
+          <label class="field field--wide"><span>Correo electrónico</span>
+            <input id="correo" name="correo" type="email" readonly aria-describedby="correo-nota"></label>
+          <p id="correo-nota" class="note field--wide">
+            El correo identifica tu cuenta, por eso no se puede cambiar desde aquí.
+          </p>
+          <label class="field field--wide"><span>Teléfono *</span>
+            <input id="telefono" name="telefono" type="tel" inputmode="tel" maxlength="20"
+                   autocomplete="tel" placeholder="10 dígitos" required></label>
+        </div>
+
+        <p id="perfil-error" class="form-error" role="alert" hidden></p>
+        <p id="perfil-ok" class="ok-msg" role="status" hidden></p>
+
+        <div class="perfil-acciones">
+          <button type="submit" id="perfil-guardar" class="primary-button">Guardar cambios</button>
+          <button type="button" id="perfil-cancelar" class="secondary-button">Descartar cambios</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="pie">© <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados</footer>
+</body>
+</html>
