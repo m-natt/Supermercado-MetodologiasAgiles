@@ -40,6 +40,12 @@ def listar(
     return {"ok": True, "data": productos}
 
 
+# Debe ir antes de "/{id_producto}" para que "mas-vendidos" no se lea como un id
+@router.get("/mas-vendidos")
+def mas_vendidos(limite: int = Query(default=8, ge=1, le=24)):
+    return {"ok": True, "data": producto_service.mas_vendidos(limite)}
+
+
 @router.get("/{id_producto}")
 def obtener(id_producto: int):
     return {"ok": True, "data": _buscar_o_404(id_producto)}

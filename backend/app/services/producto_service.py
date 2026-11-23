@@ -43,6 +43,24 @@ def listar(id_categoria=None, incluir_inactivos=False,
     return consultar(sql, params)
 
 
+def mas_vendidos(limite=8):
+    """Productos activos con más unidades vendidas (sin contar pedidos cancelados)."""
+    return consultar(
+        SELECT_PRODUCTO + """
+        JOIN (
+            SELECT d.id_producto, SUM(d.cantidad) AS vendidas
+            FROM detalle_pedido d
+            JOIN pedidos pe ON pe.id_pedido = d.id_pedido
+            WHERE pe.estado <> 'cancelado'
+            GROUP BY d.id_producto
+        ) v ON v.id_producto = p.id_producto
+        WHERE p.activo = 1
+        ORDER BY v.vendidas DESC, p.nombre
+        LIMIT %s""",
+        (limite,),
+    )
+
+
 def obtener(id_producto):
     filas = consultar(SELECT_PRODUCTO + " WHERE p.id_producto = %s", (id_producto,))
     return filas[0] if filas else None
