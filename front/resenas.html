@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Reseñas de productos y marcas">
+  <title>Supermercado Bonito :3 | Reseñas</title>
+  <link rel="stylesheet" href="css/styles.css?v=2026112201">
+  <link rel="stylesheet" href="css/diseno.css?v=2026112201">
+  <link rel="stylesheet" href="css/checkout.css?v=2026112201">
+  <link rel="stylesheet" href="css/resenas.css?v=2026112201">
+  <script src="js/config.js?v=2026112201" defer></script>
+  <script src="js/carrito.js?v=2026112201" defer></script>
+  <script src="js/sesion.js?v=2026112201" defer></script>
+  <script src="js/resenas.js?v=2026112201" defer></script>
+</head>
+<body>
+
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario">
+        <span class="usuario__icono">👤</span>
+        Mi cuenta
+      </a>
+      <a href="checkout.html" class="carrito">
+        <span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container checkout-page rev-page">
+    <a href="index.html" class="back-link">← Volver a la tienda</a>
+    <h1 class="page-title">Reseñas</h1>
+
+    <div class="rev-tabs" role="tablist" aria-label="Tipo de reseña">
+      <button type="button" id="tab-producto" class="rev-tab" role="tab" aria-selected="true">Productos</button>
+      <button type="button" id="tab-marca" class="rev-tab" role="tab" aria-selected="false">Marcas</button>
+    </div>
+
+    <label class="rev-field rev-picker">
+      <span id="rev-target-label">Producto</span>
+      <select id="rev-target"></select>
+    </label>
+
+    <p id="rev-status" class="rev-status" role="status">Cargando…</p>
+
+    <div id="rev-content" hidden>
+      <!-- Promedio y desglose por estrellas -->
+      <section class="panel rev-summary" aria-labelledby="rev-name">
+        <div class="rev-summary__main">
+          <h2 id="rev-name"></h2>
+          <div class="rev-score">
+            <strong id="rev-avg" class="rev-score__number">–</strong>
+            <span id="rev-avg-stars" class="rev-stars"></span>
+          </div>
+          <p id="rev-total" class="rev-muted"></p>
+        </div>
+        <ul id="rev-bars" class="rev-bars"></ul>
+      </section>
+
+      <!-- Escribir o editar mi reseña -->
+      <section class="panel" aria-labelledby="rev-mine-title">
+        <h2 id="rev-mine-title">Tu reseña</h2>
+        <div id="rev-login" hidden>
+          <p class="rev-muted">Inicia sesión para escribir una reseña.</p>
+          <a href="usuarios.html" class="primary-button rev-login-button">Iniciar sesión</a>
+        </div>
+        <form id="rev-form" class="rev-form" novalidate hidden>
+          <p id="rev-mine-state" class="rev-notice" hidden></p>
+          <div class="rev-field">
+            <span id="rev-stars-label">Calificación</span>
+            <div id="rev-stars-input" class="rev-stars-input" role="radiogroup" aria-labelledby="rev-stars-label"></div>
+          </div>
+          <label class="rev-field">
+            <span>Título (opcional)</span>
+            <input id="rev-title" maxlength="100" autocomplete="off">
+          </label>
+          <label class="rev-field">
+            <span>Tu opinión (opcional)</span>
+            <textarea id="rev-comment" rows="4" maxlength="1000"></textarea>
+            <small id="rev-counter" class="rev-muted">0 / 1000</small>
+          </label>
+          <p id="rev-form-message" class="rev-message" role="status" aria-live="polite" hidden></p>
+          <div class="rev-form__actions">
+            <button type="button" id="rev-delete" class="secondary-button" hidden>Eliminar mi reseña</button>
+            <button type="submit" id="rev-submit" class="primary-button">Enviar reseña</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Reseñas de otros clientes (solo las aprobadas) -->
+      <section aria-labelledby="rev-list-title">
+        <div class="panel__head">
+          <h2 id="rev-list-title">Opiniones de clientes</h2>
+        </div>
+        <p id="rev-list-status" class="rev-muted"></p>
+        <div id="rev-list" class="rev-list"></div>
+        <button type="button" id="rev-more" class="secondary-button rev-more" hidden>Ver más reseñas</button>
+      </section>
+    </div>
+
+    <!-- Todas mis reseñas, con su estado -->
+    <section id="rev-mine-all" class="panel" aria-labelledby="rev-all-title" hidden>
+      <h2 id="rev-all-title">Mis reseñas</h2>
+      <ul id="rev-mine-list" class="rev-mine-list"></ul>
+    </section>
+  </main>
+
+  <footer class="pie">
+    © <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados
+  </footer>
+</body>
+</html>

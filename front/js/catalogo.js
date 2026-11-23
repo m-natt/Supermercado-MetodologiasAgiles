@@ -63,6 +63,37 @@ function addToCartButton(product) {
   return button;
 }
 
+// Reseñas (incisos 39 y 41): enlaces a la página de reseñas del producto y de su marca
+function reviewLinks(product) {
+  const box = document.createElement("div");
+  Object.assign(box.style, { display: "grid", gap: "6px", margin: "12px 0" });
+  const linkStyle = { color: "inherit", fontSize: "14px", fontWeight: "700" };
+
+  const productLink = makeText("a", "", "⭐ Ver y escribir reseñas");
+  productLink.href = `resenas.html?tipo=producto&id=${product.id_producto}`;
+  Object.assign(productLink.style, linkStyle);
+  box.append(productLink);
+
+  if (product.id_marca) {
+    const brandLink = makeText("a", "", `Reseñas de la marca ${product.marca || ""}`.trim());
+    brandLink.href = `resenas.html?tipo=marca&id=${product.id_marca}`;
+    Object.assign(brandLink.style, linkStyle);
+    box.append(brandLink);
+  }
+
+  // Si ya hay reseñas publicadas, muestra el promedio (si falla, queda el texto simple)
+  fetch(`${API_BASE}/api/resenas/producto/${product.id_producto}?limite=1`)
+    .then(response => (response.ok ? response.json() : null))
+    .then(body => {
+      const resumen = body && body.data && body.data.resumen;
+      if (resumen && resumen.total > 0) {
+        productLink.textContent = `⭐ ${resumen.promedio} (${resumen.total} ${resumen.total === 1 ? "reseña" : "reseñas"}) · Ver reseñas`;
+      }
+    })
+    .catch(() => { /* sin promedio: no pasa nada */ });
+  return box;
+}
+
 function openDetails(product) {
   dialogContent.replaceChildren();
   const image = document.createElement("img");
@@ -78,6 +109,7 @@ function openDetails(product) {
   dialogContent.append(makeText("p", "price", money(product.precio)));
   dialogContent.append(makeText("p", "unit", `Unidad: ${product.unidad || "No especificada"}`));
   dialogContent.append(makeText("p", "stock", Number(product.stock) > 0 ? `Disponible · ${product.stock} en existencia` : "Agotado"));
+  dialogContent.append(reviewLinks(product));
   dialogContent.append(addToCartButton(product));
   dialog.showModal();
 }

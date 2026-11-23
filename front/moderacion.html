@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supermercado Bonito :3 | Moderación de reseñas</title>
+  <link rel="stylesheet" href="css/styles.css?v=2026112201">
+  <link rel="stylesheet" href="css/diseno.css?v=2026112201">
+  <link rel="stylesheet" href="css/checkout.css?v=2026112201">
+  <link rel="stylesheet" href="css/inventario.css?v=2026112201">
+  <link rel="stylesheet" href="css/admin.css?v=2026112201">
+  <link rel="stylesheet" href="css/resenas.css?v=2026112201">
+  <script src="js/config.js?v=2026112201" defer></script>
+  <script src="js/sesion.js?v=2026112201" defer></script>
+  <script src="js/moderacion.js?v=2026112201" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario"><span class="usuario__icono">👤</span> Mi cuenta</a>
+    </div>
+  </header>
+
+  <main class="container checkout-page inv-page mod-page">
+    <!-- Se muestra si no hay sesión o no es administrador -->
+    <section id="mod-gate" class="panel adm-gate" hidden>
+      <h2 id="mod-gate-title"></h2>
+      <p id="mod-gate-text"></p>
+      <a href="usuarios.html" class="primary-button">Ir a mi cuenta</a>
+    </section>
+
+    <div id="mod-app" hidden>
+      <a href="admin.html" class="back-link">← Volver al panel de administración</a>
+      <h1 class="page-title">Moderación de reseñas</h1>
+      <p class="inv-subtitle">Las reseñas nuevas no se publican hasta que las apruebes.</p>
+      <p id="mod-message" class="inv-message" role="status" aria-live="polite" hidden></p>
+
+      <section class="inv-cards" aria-label="Resumen de reseñas">
+        <article class="inv-card inv-card--bajo">
+          <span class="inv-card__label">Por revisar</span>
+          <strong id="sum-pendientes" class="inv-card__value">–</strong>
+        </article>
+        <article class="inv-card">
+          <span class="inv-card__label">Pendientes de productos</span>
+          <strong id="sum-pend-producto" class="inv-card__value">–</strong>
+        </article>
+        <article class="inv-card">
+          <span class="inv-card__label">Pendientes de marcas</span>
+          <strong id="sum-pend-marca" class="inv-card__value">–</strong>
+        </article>
+        <article class="inv-card">
+          <span class="inv-card__label">Publicadas</span>
+          <strong id="sum-aprobadas" class="inv-card__value">–</strong>
+        </article>
+      </section>
+
+      <section class="panel" aria-labelledby="mod-title">
+        <h2 id="mod-title">Reseñas</h2>
+        <div class="mod-toolbar">
+          <label class="inv-field">
+            <span>Reseñas de</span>
+            <select id="mod-tipo">
+              <option value="producto">Productos</option>
+              <option value="marca">Marcas</option>
+            </select>
+          </label>
+          <label class="inv-field">
+            <span>Mostrar</span>
+            <select id="mod-estado">
+              <option value="pendiente">Pendientes</option>
+              <option value="aprobada">Publicadas</option>
+              <option value="rechazada">Rechazadas</option>
+              <option value="todas">Todas</option>
+            </select>
+          </label>
+          <button type="button" id="mod-refresh" class="secondary-button">↻ Actualizar</button>
+        </div>
+        <p id="mod-status" class="inv-status" role="status">Cargando reseñas…</p>
+        <div id="mod-list" class="mod-list"></div>
+      </section>
+    </div>
+
+    <p id="mod-loading" class="inv-status">Verificando acceso…</p>
+  </main>
+
+  <footer class="pie">
+    © <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados
+  </footer>
+</body>
+</html>

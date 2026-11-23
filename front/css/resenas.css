@@ -1,0 +1,111 @@
+/* =====================================================
+   resenas.css — Reseñas de productos y marcas (resenas.html)
+   y moderación de reseñas (moderacion.html).
+   Se carga DESPUÉS de styles.css, diseno.css y checkout.css
+   y usa sus variables (--green, --line, --muted, --ink...).
+   ===================================================== */
+
+.rev-page [hidden],
+.mod-page [hidden] { display: none !important; }
+
+.rev-muted { color: var(--muted); font-size: 13px; }
+.rev-stars { color: #f5a623; font-size: 18px; letter-spacing: 2px; white-space: nowrap; }
+
+/* ---------- Pestañas y selector ---------- */
+.rev-tabs { display: flex; gap: 8px; margin: 0 0 16px; }
+.rev-tab {
+  padding: 10px 22px; border: 1px solid var(--line); border-radius: 999px; background: #fff;
+  color: var(--ink); font: inherit; font-size: 14px; font-weight: 750; cursor: pointer;
+}
+.rev-tab:hover { background: var(--green-soft); }
+.rev-tab[aria-selected="true"] { border-color: var(--green); background: var(--green); color: #fff; }
+.rev-field { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; }
+.rev-field input,
+.rev-field select,
+.rev-field textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid #d6e7dc; border-radius: 9px; background: #fff;
+  color: var(--ink); font: inherit; font-size: 14px; font-weight: 500; letter-spacing: 0; text-transform: none;
+}
+.rev-field textarea { resize: vertical; min-height: 96px; }
+.rev-picker { max-width: 420px; margin: 0 0 20px; }
+.rev-status { margin: 0; padding: 28px 10px; text-align: center; color: var(--muted); font-size: 15px; }
+.rev-tab:focus-visible,
+.rev-field input:focus-visible,
+.rev-field select:focus-visible,
+.rev-field textarea:focus-visible,
+.rev-star:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* ---------- Resumen: promedio y barras ---------- */
+.rev-page .panel { margin-bottom: 20px; }
+.rev-summary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 28px; align-items: center; }
+.rev-summary h2 { margin: 0 0 8px; }
+.rev-score { display: flex; align-items: center; gap: 12px; }
+.rev-score__number { font-size: 44px; letter-spacing: -2px; line-height: 1; }
+.rev-score .rev-stars { font-size: 22px; }
+.rev-summary p { margin: 6px 0 0; }
+.rev-bars { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.rev-bar { display: grid; grid-template-columns: 36px 1fr 36px; align-items: center; gap: 10px; font-size: 13px; }
+.rev-bar__label { color: var(--muted); font-weight: 700; white-space: nowrap; }
+.rev-bar__track { height: 10px; overflow: hidden; border-radius: 999px; background: var(--line); }
+.rev-bar__fill { height: 100%; border-radius: 999px; background: #f5a623; }
+.rev-bar__count { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* ---------- Formulario de mi reseña ---------- */
+.rev-form { display: grid; gap: 16px; }
+.rev-stars-input { display: flex; gap: 4px; }
+.rev-star { padding: 0 2px; border: 0; background: none; color: #cfd3d0; font-size: 34px; line-height: 1; cursor: pointer; }
+.rev-star:hover,
+.rev-star.is-on { color: #f5a623; }
+.rev-form__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+.rev-login-button { display: inline-block; text-decoration: none; }
+.rev-notice,
+.rev-message { margin: 0; padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 600; line-height: 1.4; }
+.rev-notice--pendiente { background: #fff4dc; color: #7a4b00; }
+.rev-notice--aprobada { background: #e6f4ea; color: #1e6b3a; }
+.rev-notice--rechazada { background: #fdecea; color: #a12a1f; }
+.rev-message--ok { background: #e6f4ea; color: #1e6b3a; }
+.rev-message--error { background: #fdecea; color: #a12a1f; }
+
+/* ---------- Etiquetas ---------- */
+.rev-badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.rev-badge--pendiente { background: #fff1d6; color: #8a5300; }
+.rev-badge--aprobada { background: #e6f4ea; color: #1e6b3a; }
+.rev-badge--rechazada { background: #fdecea; color: #a12a1f; }
+.rev-badge--verificada { background: var(--green-soft); color: var(--green); }
+
+/* ---------- Opiniones de clientes ---------- */
+.rev-list { display: grid; gap: 14px; margin-bottom: 14px; }
+.rev-item { padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.rev-item__head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 6px; }
+.rev-item__title { font-size: 15px; }
+.rev-item__text { margin: 0 0 10px; line-height: 1.55; white-space: pre-line; overflow-wrap: anywhere; }
+.rev-item__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; }
+.rev-more { margin-top: 4px; }
+
+/* ---------- Mis reseñas ---------- */
+.rev-mine-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.rev-mine-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.rev-mine-item__info { display: grid; gap: 3px; min-width: 0; }
+.rev-mine-item__actions { display: flex; align-items: center; gap: 10px; }
+.rev-mine-item__actions .secondary-button { padding: 8px 14px; font-size: 13px; }
+
+/* ---------- Moderación (admin) ---------- */
+.mod-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; margin: 0 0 16px; }
+.mod-list { display: grid; gap: 14px; }
+.mod-item { padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.mod-item--pendiente { border-color: #f0d28a; background: #fffbf1; }
+.mod-item__head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 8px; }
+.mod-item__target { font-size: 15px; }
+.mod-item__title { display: block; margin-bottom: 4px; font-size: 15px; }
+.mod-item__text { margin: 0 0 10px; line-height: 1.55; white-space: pre-line; overflow-wrap: anywhere; }
+.mod-item__meta { margin: 0 0 12px; color: var(--muted); font-size: 12px; }
+.mod-item__reason { margin: 0 0 12px; padding: 8px 12px; border-radius: 8px; background: #fdecea; color: #a12a1f; font-size: 13px; font-weight: 600; }
+.mod-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mod-reason { flex: 1 1 220px; padding: 8px 10px; border: 1px solid #d6e7dc; border-radius: 8px; background: #fff; color: var(--ink); font: inherit; font-size: 13px; }
+.mod-reason:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+@media (max-width: 760px) {
+  .rev-summary { grid-template-columns: 1fr; gap: 18px; }
+  .rev-form__actions .primary-button,
+  .rev-form__actions .secondary-button { flex: 1 1 100%; }
+}
