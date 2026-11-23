@@ -11,7 +11,10 @@
   <link rel="stylesheet" href="css/checkout.css?v=2026111802">
   <script src="js/config.js?v=2026111802" defer></script>
   <script src="js/carrito.js?v=2026111802" defer></script>
-  <script src="js/catalogo.js?v=2026112301" defer></script>
+  <link rel="stylesheet" href="css/listas.css?v=2026112303">
+  <script src="js/sesion.js?v=2026112201" defer></script>
+  <script src="js/lista-selector.js?v=2026112303" defer></script>
+  <script src="js/catalogo.js?v=2026112303" defer></script>
   <script src="js/cobertura.js?v=2026111802" defer></script>
 </head>
 <body>
@@ -24,6 +27,10 @@
       <input id="search-input" type="search" class="buscador" placeholder="Buscar productos..." aria-label="Buscar productos" maxlength="100" autocomplete="off">
     </div>
     <div class="header__acciones">
+      <a href="listas.html" class="usuario">
+        <span class="usuario__icono">📝</span>
+        Mis listas
+      </a>
       <a href="usuarios.html" class="usuario">
         <span class="usuario__icono">👤</span>
         Mi cuenta
@@ -63,6 +70,17 @@
 
   <!-- ===== CATÁLOGO ORIGINAL (no cambiar los id: los usa js/catalogo.js) ===== -->
   <main class="container">
+    <!-- Más vendidos: se oculta si todavía no hay ventas -->
+    <section class="best-sellers" id="best-sellers" aria-labelledby="best-sellers-title" hidden>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">LO QUE MÁS LLEVAN NUESTROS CLIENTES</p>
+          <h2 id="best-sellers-title">🔥 Más vendidos</h2>
+        </div>
+      </div>
+      <div id="best-sellers-grid" class="product-grid"></div>
+    </section>
+
     <section class="catalog-section" id="catalogo" aria-labelledby="catalog-title">
       <div class="section-heading">
         <div>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tus listas de compras personales">
+  <title>Supermercado Bonito :3 | Mis listas</title>
+  <link rel="stylesheet" href="css/styles.css?v=2026112201">
+  <link rel="stylesheet" href="css/diseno.css?v=2026112201">
+  <link rel="stylesheet" href="css/checkout.css?v=2026112201">
+  <link rel="stylesheet" href="css/listas.css?v=2026112303">
+  <script src="js/config.js?v=2026112201" defer></script>
+  <script src="js/carrito.js?v=2026112201" defer></script>
+  <script src="js/sesion.js?v=2026112201" defer></script>
+  <script src="js/listas.js?v=2026112303" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo">Supermercado Bonito :3</a>
+    <div class="header__acciones">
+      <a href="usuarios.html" class="usuario"><span class="usuario__icono">👤</span> Mi cuenta</a>
+      <a href="checkout.html" class="carrito"><span class="carrito__icono">🛒</span> Mi carrito
+        <span class="carrito__contador" data-cart-count hidden>0</span></a>
+    </div>
+  </header>
+
+  <main class="container checkout-page lists-page">
+    <a href="index.html#catalogo" class="back-link">← Seguir comprando</a>
+    <h1 class="page-title">Mis listas de compras</h1>
+
+    <section id="lists-login" class="panel empty-cart" hidden>
+      <span class="empty-cart__icon" aria-hidden="true">🔒</span>
+      <h2>Inicia sesión para ver tus listas</h2>
+      <p>Guarda tu despensa de la semana y agrégala al carrito cuando quieras.</p>
+      <a href="usuarios.html" class="primary-button">Iniciar sesión</a>
+    </section>
+
+    <p id="lists-message" class="lists-message" role="status" aria-live="polite" hidden></p>
+
+    <div id="lists-app" class="lists-layout" hidden>
+      <aside class="panel lists-side" aria-labelledby="lists-title">
+        <h2 id="lists-title">Tus listas</h2>
+        <form id="new-list-form" class="lists-new">
+          <label class="field"><span>Nueva lista</span>
+            <input id="new-list-name" maxlength="80" placeholder="Ej. Despensa de la semana" autocomplete="off"></label>
+          <button type="submit" class="primary-button">Crear lista</button>
+        </form>
+        <p id="lists-status" class="lists-note">Cargando listas…</p>
+        <ul id="lists-nav" class="lists-nav"></ul>
+      </aside>
+
+      <section class="panel lists-detail" aria-live="off">
+        <div id="detail-empty" class="lists-empty">
+          <span aria-hidden="true">📝</span>
+          <h2>Elige o crea una lista</h2>
+          <p>Por ejemplo: «Despensa de la semana», «Carne asada» o «Limpieza».</p>
+        </div>
+
+        <div id="detail" hidden>
+          <div class="lists-head">
+            <form id="rename-form" class="lists-rename">
+              <input id="list-name" maxlength="80" aria-label="Nombre de la lista" autocomplete="off">
+              <button type="submit" class="secondary-button">Guardar nombre</button>
+            </form>
+            <button type="button" id="delete-list" class="lists-danger">Eliminar lista</button>
+          </div>
+
+          <div class="lists-search">
+            <label class="field"><span>Agregar productos</span>
+              <input id="product-search" type="search" maxlength="100" placeholder="Busca leche, arroz, huevo…" autocomplete="off"></label>
+            <ul id="search-results" class="lists-results" hidden></ul>
+            <p id="search-status" class="lists-note" hidden></p>
+          </div>
+
+          <p id="items-empty" class="lists-note">Tu lista está vacía. Busca un producto para empezar.</p>
+          <ul id="items" class="lists-items"></ul>
+
+          <div class="lists-foot">
+            <div>
+              <span id="list-progress" class="lists-note"></span>
+              <strong id="list-total" class="lists-total"></strong>
+            </div>
+            <button type="button" id="add-to-cart" class="primary-button">🛒 Agregar pendientes al carrito</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="pie">© <span id="year">2026</span> Supermercado Bonito :3 — Todos los derechos reservados</footer>
+</body>
+</html>

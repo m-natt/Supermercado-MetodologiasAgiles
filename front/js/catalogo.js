@@ -64,6 +64,14 @@ function addToCartButton(product) {
   return button;
 }
 
+// Botón para guardar el producto en una lista de compras personal
+function addToListButton(product) {
+  const button = makeText("button", "detail-button", "📝 Agregar a lista");
+  button.type = "button";
+  button.addEventListener("click", () => ListaSelector.abrir(product));
+  return button;
+}
+
 // Reseñas (incisos 39 y 41): enlaces a la página de reseñas del producto y de su marca
 function reviewLinks(product) {
   const box = document.createElement("div");
@@ -111,16 +119,21 @@ function openDetails(product) {
   dialogContent.append(makeText("p", "unit", `Unidad: ${product.unidad || "No especificada"}`));
   dialogContent.append(makeText("p", "stock", Number(product.stock) > 0 ? `Disponible · ${product.stock} en existencia` : "Agotado"));
   dialogContent.append(reviewLinks(product));
-  dialogContent.append(addToCartButton(product));
+  dialogContent.append(addToCartButton(product), addToListButton(product));
   dialog.showModal();
 }
 
-function productCard(product) {
+function productCard(product, rank = null) {
   const card = document.createElement("article");
   card.className = "product-card";
 
   const imageWrap = document.createElement("div");
   imageWrap.className = "product-image-wrap";
+  if (rank) {
+    const badge = makeText("span", "rank-badge", `#${rank}`);
+    badge.setAttribute("aria-label", `Número ${rank} en ventas`);
+    imageWrap.append(badge);
+  }
   if (product.imagen_url) {
     const image = document.createElement("img");
     image.className = "product-image";
@@ -155,7 +168,7 @@ function productCard(product) {
   const button = makeText("button", "detail-button", "Ver detalles");
   button.type = "button";
   button.addEventListener("click", () => openDetails(product));
-  info.append(addToCartButton(product), button);
+  info.append(addToCartButton(product), addToListButton(product), button);
 
   card.append(imageWrap, info);
   return card;
@@ -212,6 +225,22 @@ async function loadCatalog() {
       `No pudimos cargar los productos. ${error.message} Verifica que el backend esté encendido y que API_BASE sea correcto.`,
       "error"
     );
+  }
+}
+
+/* ===== Más vendidos ===== */
+async function loadBestSellers() {
+  const section = document.getElementById("best-sellers");
+  const bestGrid = document.getElementById("best-sellers-grid");
+  try {
+    const response = await fetch(`${API_BASE}/api/productos/mas-vendidos?limite=8`);
+    if (!response.ok) throw new Error();
+    const result = await response.json();
+    if (result.ok !== true || !Array.isArray(result.data)) throw new Error();
+    bestGrid.replaceChildren(...result.data.map((product, index) => productCard(product, index + 1)));
+    section.hidden = result.data.length === 0;
+  } catch (error) {
+    section.hidden = true; // Si falla, el catálogo sigue funcionando
   }
 }
 
@@ -384,4 +413,5 @@ clearButton.addEventListener("click", () => {
 
 loadCategories();
 loadBrands();
+loadBestSellers();
 loadCatalog();
