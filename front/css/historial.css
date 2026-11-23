@@ -73,6 +73,24 @@
 .notification-item__date { color: var(--muted); font-size: 12px; }
 
 
+/* ---------- Mis reseñas ---------- */
+.hist-reviews { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.hist-review { display: grid; gap: 5px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.hist-review__head { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.hist-review__target { font-size: 15px; overflow-wrap: anywhere; }
+.hist-review__badge { padding: 4px 10px; border-radius: 999px; background: var(--green-soft); color: var(--green); font-size: 12px; font-weight: 800; white-space: nowrap; }
+.hist-review__badge--pendiente { background: #fff1d6; color: #8a5300; }
+.hist-review__badge--aprobada { background: #e6f4ea; color: #1e6b3a; }
+.hist-review__badge--rechazada { background: #fdecea; color: #a12a1f; }
+.hist-review__stars { color: #b7791f; font-size: 15px; letter-spacing: 1px; }
+.hist-review__title { font-size: 14px; overflow-wrap: anywhere; }
+.hist-review__text { margin: 0; font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-line; }
+.hist-review__reason { margin: 0; padding: 8px 10px; border-radius: 8px; background: #fdecea; color: #a12a1f; font-size: 13px; overflow-wrap: anywhere; }
+.hist-review__foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 3px; }
+.hist-review__meta { color: var(--muted); font-size: 12px; }
+.hist-review__link { color: var(--green); font-size: 13px; font-weight: 800; }
+.hist-review__link:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
 /* Aviso que llegó sin leer */
 .notification-item--nueva { border-color: var(--green); background: var(--green-soft); }
 .notification-item--nueva .notification-item__title::after {

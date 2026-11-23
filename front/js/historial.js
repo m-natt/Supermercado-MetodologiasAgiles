@@ -14,6 +14,9 @@ const ordersCount = byId("orders-count");
 const notificationsStatus = byId("notifications-status");
 const notificationsList = byId("notifications-list");
 const notificationsCount = byId("notifications-count");
+const reviewsStatus = byId("reviews-status");
+const reviewsList = byId("reviews-list");
+const reviewsCount = byId("reviews-count");
 
 const numero = n => new Intl.NumberFormat("es-MX").format(n);
 const plural = (n, uno, varios) => `${numero(n)} ${n === 1 ? uno : varios}`;
@@ -170,6 +173,64 @@ async function cargarNotificaciones() {
   }
 }
 
+// ---------- Mis reseñas ----------
+const ESTADOS_RESENA = {
+  pendiente: { texto: "Pendiente de aprobación", clase: "hist-review__badge--pendiente" },
+  aprobada: { texto: "Publicada", clase: "hist-review__badge--aprobada" },
+  rechazada: { texto: "Rechazada", clase: "hist-review__badge--rechazada" },
+};
+
+function tarjetaResena(r) {
+  const li = document.createElement("li");
+  li.className = "hist-review";
+
+  const cabecera = document.createElement("div");
+  cabecera.className = "hist-review__head";
+  const objetivo = r.tipo === "marca" ? `Marca: ${r.objetivo}` : r.objetivo;
+  const estado = ESTADOS_RESENA[r.estado] || { texto: capitalizar(r.estado), clase: "" };
+  cabecera.append(
+    makeText("strong", "hist-review__target", objetivo),
+    makeText("span", `hist-review__badge ${estado.clase}`, estado.texto)
+  );
+
+  const estrellas = makeText("span", "hist-review__stars", "★".repeat(r.calificacion) + "☆".repeat(5 - r.calificacion));
+  estrellas.setAttribute("role", "img");
+  estrellas.setAttribute("aria-label", `${r.calificacion} de 5 estrellas`);
+  li.append(cabecera, estrellas);
+
+  if (r.titulo) li.append(makeText("strong", "hist-review__title", r.titulo));
+  if (r.comentario) li.append(makeText("p", "hist-review__text", r.comentario));
+  if (r.estado === "rechazada" && r.motivo_rechazo) {
+    li.append(makeText("p", "hist-review__reason", `Motivo: ${r.motivo_rechazo}`));
+  }
+
+  const pie = document.createElement("div");
+  pie.className = "hist-review__foot";
+  const detalle = formatoDia(r.fecha) + (r.compra_verificada ? " · ✓ Compra verificada" : "");
+  const editar = makeText("a", "hist-review__link", "Ver o editar →");
+  editar.href = `resenas.html?tipo=${encodeURIComponent(r.tipo)}&id=${encodeURIComponent(r.id_objetivo)}`;
+  pie.append(makeText("span", "hist-review__meta", detalle), editar);
+  li.append(pie);
+  return li;
+}
+
+async function cargarResenas() {
+  try {
+    const resenas = await pedirJson("/api/resenas/mias");
+    if (!Array.isArray(resenas)) throw new Error("La respuesta del servidor no tiene el formato esperado.");
+    reviewsList.replaceChildren(...resenas.map(tarjetaResena));
+    reviewsCount.textContent = plural(resenas.length, "reseña", "reseñas");
+    reviewsStatus.hidden = resenas.length > 0;
+    if (resenas.length === 0) {
+      reviewsStatus.textContent = "Todavía no has escrito reseñas. Puedes hacerlo desde el detalle de un producto en el catálogo.";
+    }
+  } catch (error) {
+    if (error.sinSesion) { mostrarLogin(); return; }
+    reviewsStatus.hidden = false;
+    reviewsStatus.textContent = `No pudimos cargar tus reseñas. ${error.message}`;
+  }
+}
+
 // ---------- Historial de pedidos ----------
 function lineaPedido(item) {
   const li = document.createElement("li");
@@ -297,6 +358,7 @@ if (!Sesion.leer()) {
 } else {
   contentBox.hidden = false;
   cargarFrecuentes();
+  cargarResenas();
   cargarPedidos();
   cargarNotificaciones();
   // Actualiza avisos mientras el cliente mantiene abierta la página.
