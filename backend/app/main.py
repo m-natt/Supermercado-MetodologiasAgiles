@@ -7,7 +7,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.routers import (
     admin, categorias, clientes, cobertura, direcciones, facturas, health, historial, inventario, marcas,
-    pedidos, productos,
+    moderacion, pedidos, productos, resenas,
 )
 
 app = FastAPI(title="API del Supermercado")
@@ -66,3 +66,5 @@ app.include_router(direcciones.router)
 app.include_router(facturas.router)
 app.include_router(historial.router)
 app.include_router(inventario.router)
+app.include_router(resenas.router)
+app.include_router(moderacion.router)
